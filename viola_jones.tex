@@ -16,9 +16,8 @@ Pouzdanost i brzina su postignuti uvođenjem tri ključna doprinosa:
 \item \textbf{Integralna slika} omogućava brzo izračunavanje obeležja.
 \item \textbf{AdaBoost} algoritam za učenje, odabiranjem obeležja povećava
   brzinu i pouzdanost detekcije.
-\item \textbf{Kaskadni klasifikator} Realizovanjem algoritma u kaskadama
-  omogućava brzo odbacivanje pozadine slike kako je mala verovatnoća da će se tu
-  naći lice. \\
+\item \textbf{Kaskadni klasifikator} organizovanjem obeležja u kaskadama
+  omogućava brzo odbacivanje pozadine slike. \\
 \end{itemize}
 
 
@@ -49,7 +48,7 @@ sekvencijalno. Izbor algoritma za računanje integralne slike značajno utiče n
 performanse i potrebne hardverske resurse. \\
 U paralelnoj implementaciji cena je
 više pristupa memoriji i više potrebnih sabirača, dok je kod sekvencijalne
-implementacije manja brzina. \\
+implementacije manja brzina proračunavanja. \\
 
 Osobina koja integralnu sliku čini pogodnu za korišćenje u Viola-Jones algoritmu
 je da je za računanje bilo koje pravougaone površine unutar integralne slike
@@ -193,3 +192,87 @@ Vrednosti različitih tačaka na grafu predstavlja procenat izvršavanja date et
 na svih 450 slika. Prva etapa će se naravno uvek izvršiti, dok će se druga etapa
 izvršiti samo u 19\% analiziranih prozora, druga 9\% itd... \\
 Vidimo da je posle pete etape procenat izvršavanja manji od 1\%. \\
+
+\newpage
+
+\subsection{Invarijantnost veličine}
+
+Kako lica na slikama mogu biti bliže ili dalje kameri odnosno mogu biti
+različitih dimenzija, potrebno je obezbediti da se ona detektuju nezavisno od
+veličine. \\
+
+Pošto su obeležja istrenirana da detektuju samo lica koja su iste dimenzije kao
+i veličina obeležja potrebno je obezbediti skaliranje slike ili obeležja kako bi
+mogli da detektujemo lica veća od dimenzije obeležja. \\
+Pri čemu je najmanja dimenzija lica koje je moguće detektovati jednaka dimenziji obeležja.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[height=5cm]{image_pyramid}
+  \caption{Piramida slike\cite{ImagePyramid_web}}
+  \label{image_pyramid}
+\end{figure}
+
+Ovo je rešeno uvođenjem skaliranja slike. Kao na slici(\ref{image_pyramid}) prvo
+je potrebno odraditi detekciju na originalnoj slici, zatim se slika smanjuje sa
+nekim faktorom i ponovo se vrši detekcija.
+Skaliranje se vrši sve dok je dimenzija skalirane slike veća od dimenzije obeležja.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=12cm]{sixfaces_scaled_res}
+  \caption{Različite veličine lica}
+  \label{sixfaces_scaled}
+\end{figure}
+
+Na slici(\ref{sixfaces_scaled}) može se videti rezultat klasifikatora za 3 lica
+različitih dimenzija. \\
+
+\newpage
+
+\subsection{Invarijantnost osvetljaja}
+
+Lica se mogu naći pod raznim osvetljenjima što uzrokuje problem ovom algoritmu.
+
+
+\begin{figure}[!htb]
+\centering
+\parbox{6cm}{
+\includegraphics[width=6cm]{overexposed_light}
+\caption{Previše osvetljaja\cite{CALTECH_DATASET}}
+\label{overexposed_light}}
+\qquad
+\begin{minipage}{6cm}
+\includegraphics[width=6cm]{underexposed_light}
+\caption{Premalo osvetljaja\cite{CALTECH_DATASET}}
+\label{underexposed_light}
+\end{minipage}
+\end{figure}
+
+Na slikama(\ref{overexposed_light}, \ref{underexposed_light}) su prikazane dve
+slike koje zbog nepovoljnog osvetljenja nisu detektovane od strane
+klasifikatora.
+Slika(\ref{overexposed_light}) nije detektovana zbog prevelikog osvetljenja
+lica, dok Slika(\ref{underexposed_light}) nije detektovana zbog slabog
+osvetljenja.  \\
+
+Kao delimično rešenje ovog problema uvedeno je računanje standardne devijacije
+prozora koji se detektuje.
+Ovo može poboljšati detekciju u nekim slučajevima, ali ne i ekstremnim kao u
+prethodnom primeru.
+
+\subsection{Varijantnost rotacije}
+
+\begin{figure}[!htb]
+\centering
+\parbox{6cm}{
+\includegraphics[width=6cm]{rotation_variance}
+\caption{Ne rotirana\cite{CALTECH_DATASET}}
+\label{rotation_variance}}
+\qquad
+\begin{minipage}{6cm}
+\includegraphics[width=6cm]{rotated_res}
+\caption{Rotirana\cite{CALTECH_DATASET}}
+\label{rotated_res}
+\end{minipage}
+\end{figure}
