@@ -1,0 +1,52 @@
+\section{OpenCV modeli}
+
+OpenCV sadrži alat za treniranje kaskada i detekciju objekata pomoću
+Viola-Jones algoritma.
+Takođe dolazi sa istreniranim i testiranim
+klasifikatorima\footnote{\url{https://github.com/opencv/opencv/tree/master/data/haarcascades}}
+\cite{OpenCV_docs} \\
+
+\noindent
+Rezultat treniranja se smešta u .xml fajl koji sadrži sledeće informacije:
+
+\begin{itemize}
+	\item Dimenzija obeležja (\emph{height, width})
+	\item Broj etapa (\emph{stageNum})
+	\item Maksimalan broj obeležja u etapi (\emph{maxWeakCount})
+	\item Informacije o etapama (\emph{stages})
+    \begin{itemize}
+    \item Broj obeležja u etapi (\emph{maxWeakCount})
+    \item Prag etape (\emph{stageThreshold})
+    \item Informacije o obeležjima (\emph{weakClassifiers})
+      \begin{itemize}
+      \item Prag obeležja (\emph{internalNodes})
+      \item Vrednosti listova (\emph{leafValues})
+      \end{itemize}
+    \end{itemize}
+	\item Informacije o obeležjima (\emph{features})
+    \begin{itemize}
+    \item Koordinate i težine tačaka pravougaonika (\emph{rects}) \\
+      Svako obeležje može imati 2 ili 3 pravougaonika \\
+      Gde su prve 2 vrednosti x i y koordinate gornje leve tačke, \\
+      Treća i četvrta vrednost širina i visina pravougaonika  \\
+      Poslednja vrednost težina pravougaonika
+    \end{itemize}
+\end{itemize}
+
+\subsection{OpenCV model za frontalna lica}
+
+Često korišćeni model za detekciju lica je
+\texttt{\detokenize{haarcascade_frontalface_default.xml}}\footnote{\url{https://github.com/opencv/opencv/blob/master/data/haarcascades/haarcascade_frontalface_default.xml}}. \\
+Ovaj model se koristi za frontalnu detekciju lica. \\
+Neke njegove karakteristike su:
+\begin{itemize}
+\item Dimenzija obeležja: 24x24
+\item Broj etapa: 25
+\item Maksimalan broj obeležja u etapi: 211
+\item Ukupan broj obeležja: 2913
+\end{itemize}
+
+\noindent
+Rezultati detekcije ovog modela mogu se videti na
+slikama(\ref{sixfaces_scaled},\ref{overexposed_light},\ref{underexposed_light},\ref{rotation_variance},\ref{rotated_res})
+iz sekcije \ref{viola_jones_introduction}.

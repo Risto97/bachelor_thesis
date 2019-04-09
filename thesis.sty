@@ -5,9 +5,17 @@
 \graphicspath{ {./images/} }
 \usepackage{subfig}
 
+\usepackage{url}
+\usepackage{hyperref}
+
 \usepackage[tmargin=1in,bmargin=1in,lmargin=1.25in,rmargin=1.25in]{geometry}
 \sectionfont{\fontsize{22}{15}\selectfont}
 \subsectionfont{\fontsize{19}{15}\selectfont}
+
+\renewcommand\footnoterule{%
+  \kern-3\p@
+  \hrule\@width \textwidth
+  \kern2.6\p@}
 
 \usepackage{amsmath}
 \newcommand*{\Scale}[2][4]{\scalebox{#1}{$#2$}}%
@@ -16,4 +24,12 @@
 \vspace{1in}
 \textmd{\textbf{\thesisName}}\\
 \vspace{2in}
-}
+
+
+%%%% Keywords %%%%
+\newcommand{\PyGears}{PyGears\footnote{\url{https://github.com/bogdanvuk/pygears}}}
+\newcommand{\UVM}{UVM\footnote{\url{https://www.accellera.org/downloads/standards/uvm}}}
+\newcommand{\Verilator}{Verilator\footnote{\url{https://www.veripool.org/wiki/verilator}}}
+\newcommand{\QuestaSim}{Questa Sim\footnote{\url{https://www.mentor.com/products/fv/questa/}}}
+
+\newcommand{\ZTurn}{MYIR Z-Turn Board\footnote{\url{http://www.myirtech.com/list.asp?id=502}}}
