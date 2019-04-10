@@ -1,0 +1,63 @@
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum hegiht = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=3cm, minimum height=3.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, thick, -latex']
+
+\begin{tikzpicture}[thick]
+  \node [block_l] (img_ram) {IMG RAM};
+  \node [coordinate, above = 0cm of img_ram, yshift=-0.5cm, xshift=1.5cm] (img_ram_addr_in){};
+  \node [coordinate, left =2.0cm of img_ram] (img_in){};
+  \node [coordinate, left = 0cm of img_ram] (img_ram_img_in){};
+  \node [coordinate, right = 0cm of img_ram] (img_ram_img_out){};
+
+  \node [block_m, above right = +1cm and 0.2cm of img_ram] (rd_addrgen) {rd\_addrgen};
+  \node [coordinate, below = 0cm of rd_addrgen] (rd_addr_addr_out){};
+
+  \node [block_m, above right = -1.75cm and 2.5cm of img_ram ] (ii_gen) {ii\_gen};
+  \node [coordinate, left = 0cm of ii_gen] (ii_gen_in){};
+  \node [coordinate, right = 0cm of ii_gen] (ii_gen_out){};
+  \node [block_m, below = 0.25cm of ii_gen ] (sii_gen) {sii\_gen};
+  \node [coordinate, left = 0cm of sii_gen] (sii_gen_in){};
+  \node [coordinate, right = 0cm of sii_gen] (sii_gen_out){};
+
+  \node [block_s, right = 1.25cm of sii_gen ] (stddev) {stddev};
+  \node [coordinate, above left = -0.25cm and 0cm of stddev] (stddev_ii){};
+  \node [coordinate, above left = -0.75cm and 0cm of stddev] (stddev_sii){};
+  \node [coordinate, right = 0cm of stddev] (stddev_out){};
+
+  \node [block_m, right = 1.0cm of ii_gen ] (frame_buffer) {frame\_buffer};
+  \node [coordinate, left = 0cm of frame_buffer] (frame_buffer_in){};
+  \node [coordinate, above left = -0.5cm and 0cm of frame_buffer] (frame_buffer_rect_addr){};
+  \node [coordinate, right = 0cm of frame_buffer] (frame_buffer_out){};
+
+  \node [block_m, above = 1.0cm of frame_buffer ] (features_mem) {features\_mem};
+  \node [coordinate, left = 0cm of features_mem] (rects_addr){};
+  \node [coordinate, right = 0cm of features_mem] (rects_weights){};
+
+  \node [block_l, fill=red!15, above right = -3.5cm and 1cm of frame_buffer] (classifier) {\huge Classifier};
+  \node [coordinate, above left = -1cm and 0cm of classifier] (classifier_ii){};
+  \node [coordinate, above left = -2.5cm and 0cm of classifier] (classifier_stddev){};
+  \node [coordinate, above left = -0.5cm and 0cm of classifier] (classifier_weights){};
+  \node [coordinate, above right = -1.0cm and 0cm of classifier] (detected_addr){};
+  \node [coordinate, above right = -2.5cm and 0cm of classifier] (irq){};
+
+
+  \node[inner sep=7pt, inner ysep =30pt, draw,dashed, thick,fit=(img_ram) (rd_addrgen) (ii_gen) (features_mem) (sii_gen) (frame_buffer) (stddev) (classifier)] (ip_core) {};
+  \node[above left] at (ip_core.south east) {\huge Cascade Classifier IP core};
+
+  % arrows
+  \path [line] (rd_addr_addr_out)  |- (img_ram_addr_in) node[transition, xshift=0.8cm, yshift=0.25cm] {rd\_addr};
+  \path [line] (img_in) node[transition, yshift=0.25cm, xshift=0.65cm]{\large img\_in} -- (img_ram_img_in);
+  \path [line] (img_ram_img_out) node[transition, yshift=0.2cm, xshift=0.9cm] {img\_out} -- +(1.75cm, 0cm) |- (ii_gen_in);
+  \path [line] (img_ram_img_out) -- +(1.75cm, 0cm) |- (sii_gen_in);
+  \path [line] (ii_gen_out) -- +(0.5cm, 0cm) node[transition, yshift=0.2cm, xshift=0cm] {ii} |- (stddev_ii);
+  \path [line] (sii_gen_out) -- +(0.5cm, 0cm)  node[transition, yshift=0.2cm, xshift=0cm] {sii} |- (stddev_sii);
+  \path [line] (ii_gen_out) |- (frame_buffer);
+  \path [line] (frame_buffer_out) node[transition, yshift=+0.2cm, xshift=0.5cm] {fb\_ii} |- (classifier_ii);
+  \path [line] (stddev_out) -- +(0.5cm, 0) node[transition, yshift=-0.2cm, xshift=0.1cm] {stddev} |- (classifier_stddev);
+  \path [line] (rects_addr) node[transition, yshift=+0.2cm, xshift=-1.1cm] {rects\_addr}  -- +(-0.5cm, 0cm) |- (frame_buffer_rect_addr);
+  \path [line] (rects_weights) node[transition, yshift=+0.2cm, xshift=+1.2cm] {rects\_weights}  -- +(+0.5cm, 0cm) |- (classifier_weights);
+  \path [line] (detected_addr) -- +(3.0cm, 0cm) node[transition, yshift=0.25cm, xshift=-1.1cm]{\large detected\_addr} ;
+  \path [line] (irq) -- +(3.0cm, 0cm) node[transition, yshift=0.25cm, xshift=-0.4cm]{\large irq} ;
+\end{tikzpicture}
