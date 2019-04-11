@@ -1,0 +1,164 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=purple!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.0cm, text width=2.0cm, minimum height=2.0cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{dreg} = [draw, text centered, fill=blue!15, minimum width = 1.5cm,
+minimum height=1.5cm]
+\tikzstyle{w_sum} = [draw, text centered, fill=blue!15, minimum width = 3.2cm,
+minimum height=1cm]
+
+\tikzstyle{square} = [draw, thick, fill=blue!15, circle, minimum size = 1cm, node distance = 2cm]
+\tikzstyle{mult} = [draw, thick, fill=blue!15, circle, minimum size = 1cm ,node distance = 2cm]
+\tikzstyle{sum} = [draw, thick, fill=blue!15, circle, minimum size= 1cm, node distance = 2cm]
+\tikzstyle{operator} = [draw, thick, fill=blue!15, circle, minimum size= 1cm, node distance = 2cm]
+
+\tikzset{
+  multiplexer/.style={
+    draw,
+    trapezium,
+    fill=blue!15,
+    shape border uses incircle,
+    shape border rotate=180,
+    minimum size=25pt
+  }
+}
+
+\begin{tikzpicture}[thick]
+
+  \node [w_sum] (w_sum0) {weighted\_sum0};
+  \node [coordinate, left=0cm of w_sum0] (w_sum0_in){};
+  \node [coordinate, right=0cm of w_sum0] (w_sum0_out){};
+  \node [coordinate, left=0.75cm of w_sum0_in] (w_sum0_in_port){};
+
+  \node [w_sum, below=0.5cm of w_sum0] (w_sum1) {weighted\_sum1};
+  \node [coordinate, left=0cm of w_sum1] (w_sum1_in){};
+  \node [coordinate, right=0cm of w_sum1] (w_sum1_out){};
+  \node [coordinate, left=0.75cm of w_sum1_in] (w_sum1_in_port){};
+  \node [coordinate, left=3.0cm of w_sum1_in_port] (w_sum_in){};
+
+  \node [w_sum, below=0.5cm of w_sum1] (w_sum2) {weighted\_sum2};
+  \node [coordinate, left=0cm of w_sum2] (w_sum2_in){};
+  \node [coordinate, right=0cm of w_sum2] (w_sum2_out){};
+  \node [coordinate, left=0.75cm of w_sum2_in] (w_sum2_in_port){};
+
+  \node [sum, right=0.75cm of w_sum1] (sum0) {+};
+  \node [coordinate, above=0cm of sum0] (sum0_in0){};
+  \node [coordinate, left=0cm of sum0] (sum0_in1){};
+  \node [coordinate, below=0cm of sum0] (sum0_in2){};
+  \node [coordinate, right=0cm of sum0] (sum0_out){};
+
+  \node [operator, right=1.0cm of sum0] (leaf_lt) {\large \textbf{$<$}};
+  \node [coordinate, left=0cm of leaf_lt] (leaf_lt_in0){};
+  \node [coordinate, below=0cm of leaf_lt] (leaf_lt_in1){};
+  \node [coordinate, right=0cm of leaf_lt] (leaf_lt_out){};
+
+  \node [operator, below=2.5cm of leaf_lt] (mult0) {\large \textbf{$*$}};
+  \node [coordinate, left=0cm of mult0] (mult0_in0){};
+  \node [coordinate, below=0cm of mult0] (mult0_in1){};
+  \node [coordinate, above=0cm of mult0] (mult0_out){};
+
+  \node [coordinate, left=9.75cm of mult0_in0] (stddev){};
+
+  \node [block_m, below right=2cm and -0.5cm of w_sum2] (feat_thr) {feature\_thr ROM};
+  \node [coordinate, left=0cm of feat_thr] (feat_thr_addr){};
+  \node [coordinate, right=0cm of feat_thr] (feat_thr_out){};
+
+  \node [block_s, minimum width =2.5cm, left=1cm of feat_thr] (feature_cnt) {feature\_cnt};
+  \node [coordinate, right=0cm of feature_cnt] (feature_addr){};
+
+  \node [block_m, below=0.5cm of feat_thr] (stage_thr) {stage\_thr ROM};
+  \node [coordinate, left=0cm of stage_thr] (stage_thr_addr){};
+  \node [coordinate, right=0cm of stage_thr] (stage_thr_out){};
+
+  \node [block_s, minimum width =2.5cm, left=1cm of stage_thr] (stage_cnt) {stage\_cnt};
+  \node [coordinate, right=0cm of stage_cnt] (stage_addr){};
+
+  \node [multiplexer, right=2.5cm of leaf_lt] (mux0) {};
+  \node [coordinate, left=0cm of mux0] (mux0_sel){};
+  \node [coordinate, above left=0cm and 0cm of mux0] (mux0_in0){};
+  \node [coordinate, above right=0cm and 0cm of mux0] (mux0_in1){};
+  \node [coordinate, below=0cm of mux0] (mux0_out){};
+
+
+  \node [block_m, above left=1.5cm and 0cm of mux0] (leaf0) {leaf0\_ROM};
+  \node [coordinate, above=0cm of leaf0] (leaf0_addr){};
+  \node [coordinate, above=0.5cm of leaf0_addr] (leaf0_addr_port){};
+  \node [coordinate, left=4cm of leaf0_addr_port] (leaf_feat_addr){};
+  \node [coordinate, below=0cm of leaf0] (leaf0_out){};
+  \node [coordinate, below=0.5cm of leaf0_out] (leaf0_port){};
+
+  \node [block_m, above right=1.5cm and 0cm of mux0] (leaf1) {leaf1\_ROM};
+  \node [coordinate, above=0cm of leaf1] (leaf1_addr){};
+  \node [coordinate, above=0.5cm of leaf1_addr] (leaf1_addr_port){};
+  \node [coordinate, below=0cm of leaf1] (leaf1_out){};
+  \node [coordinate, below=0.5cm of leaf1_out] (leaf1_port){};
+
+  \node [block_l, minimum height = 2cm, below=2.0cm of mux0] (accum_stage) {accum\_stage};
+  \node [coordinate, below=0cm of accum_stage] (accum_stage_out){};
+  \node [coordinate, above=0cm of accum_stage] (accum_stage_in){};
+
+  \node [operator, below=2.5cm of accum_stage] (stage_lt) {\large \textbf{$<$}};
+  \node [coordinate, above=0cm of stage_lt] (stage_lt_in0){};
+  \node [coordinate, left=0cm of stage_lt] (stage_lt_in1){};
+  \node [coordinate, below=0cm of stage_lt] (stage_lt_out){};
+  \node [coordinate, below=4cm of stage_lt_out] (detect_out){};
+
+  \node [block_s, fill=red!30, below left=1cm and 2.5cm of stage_lt] (local_rst) {local\_rst};
+  \node [coordinate, right=0cm of local_rst] (local_rst_in){};
+
+  % paths
+  \path [line] (w_sum0_out) -| (sum0_in0);
+  \path [line] (w_sum1_out) -- (sum0_in1);
+  \path [line] (w_sum2_out) -| (sum0_in2);
+
+  \path [line] (w_sum1_in_port) -- (w_sum0_in_port) -- (w_sum0_in);
+  \path [line] (w_sum1_in_port) -- (w_sum1_in);
+  \path [line] (w_sum1_in_port) -- (w_sum2_in_port) -- (w_sum2_in);
+  \path [line, very thick] (w_sum_in) node[transition, yshift=+0.3cm, xshift=0.6cm] {\textbf{weight\_data}}  node[transition, yshift=-0.3cm, xshift=-0.0cm] {\textbf{fb\_ii}}  -- (w_sum1_in_port);
+
+  \path [line] (feature_addr) node[transition, yshift=-1.0cm, xshift=-0.2cm] {feature\_addr}  -- (feat_thr_addr);
+  \path [line] (feat_thr_out) -| (mult0_in1);
+  \path [line] (stddev) node[transition, yshift=+0.3cm, xshift=0.6cm] {\textbf{stddev}} -- (mult0_in0);
+
+  \path [line] (sum0_out) -- (leaf_lt_in0);
+  \path [line] (mult0_out) -- (leaf_lt_in1);
+
+  \path [line] (leaf_lt_out) -- (mux0_sel);
+
+  \path [line] (leaf0_out) -- (leaf0_port) -| (mux0_in0);
+  \path [line] (leaf1_out) -- (leaf1_port) -| (mux0_in1);
+
+  \path [line] (mux0_out) -- (accum_stage_in);
+
+  \path [line] (accum_stage_out) -- (stage_lt_in0);
+  \path [line] (stage_addr) -- (stage_thr_addr);
+  \path [line] (stage_thr_out) -- (stage_lt_in1);
+
+  \path [line] (stage_lt_out) |- (local_rst_in);
+
+  \path [line] (stage_lt_out) -- (detect_out) node[transition, yshift=+0.6cm, xshift=0.8cm] {\textbf{detect}} ;
+
+  % \path [line] (leaf1_addr) |- (leaf0_addr_port) -- (leaf_feat_addr);
+  \path [line] (leaf_feat_addr) node[transition, yshift=-0.3cm, xshift=1.2cm] {feature\_addr} -- (leaf1_addr_port) -- (leaf1_addr);
+  \path [line] (leaf_feat_addr) -- (leaf0_addr_port) -- (leaf0_addr);
+
+  %group
+
+  \begin{pgfonlayer}{background2}
+    \node[inner sep=15pt, fill=pink!25, rounded corners, draw, thick,fit=(w_sum0) (w_sum1) (w_sum2) (sum0) (w_sum1_in_port)] (weighted_sum) {};
+    \node[below left] at (weighted_sum.north east) {weighted\_sum};
+  \end{pgfonlayer}
+
+  \begin{pgfonlayer}{background1}
+    \node[inner sep=15pt, fill=yellow!25, rounded corners, draw, thick,fit=(feature_cnt) (feature_thr) (stage_cnt) (stage_thr) (local_rst) (weighted_sum) (accum_stage) (mux0) (leaf_lt) (mult0) (stage_lt) (leaf0) (leaf1) (leaf1_addr_port) (leaf0_addr_port) (leaf_feat_addr)] (frame_buffer) {};
+    \node[below right] at (frame_buffer.north west) {\Huge \textbf{Classifier}};
+  \end{pgfonlayer}
+
+\end{tikzpicture}

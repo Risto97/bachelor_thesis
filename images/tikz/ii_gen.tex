@@ -1,0 +1,63 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=red!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{sum} = [draw, thick, fill=blue!15, circle, node distance = 2cm]
+\tikzstyle{dreg} = [draw, text centered, fill=blue!15, minimum width = 1.5cm,
+minimum height=1.5cm]
+\tikzstyle{fifo} = [draw, text centered, fill=blue!15, minimum width = 2.5cm,
+minimum height=1.5cm]
+
+\begin{tikzpicture}[thick]
+  % \node [block_m] (scale_counter) {scale\_counter};
+  \node [sum] (accum_sum) {+};
+  \node [coordinate, left = 0cm of accum_sum] (accum_sum_in1){};
+  \node [coordinate, left = 3cm of accum_sum] (ii_gen_in){};
+  \node [coordinate, above = 0cm of accum_sum] (accum_sum_in2){};
+  \node [coordinate, right = 0cm of accum_sum] (accum_sum_out){};
+
+  \node [dreg, right = 1cm of accum_sum] (accum_dreg) {dreg};
+  \node [coordinate, left = 0cm of accum_dreg] (accum_dreg_in){};
+  \node [coordinate, right = 0cm of accum_dreg] (accum_dreg_out){};
+  \node [coordinate, above right = 1cm and 1cm of accum_dreg] (feedback_point_1){};
+
+  \node [sum, right = 2cm of accum_dreg] (add2) {+};
+  \node [coordinate, left = 0cm of add2] (add2_in1){};
+  \node [coordinate, below = 0cm of add2] (add2_in2){};
+  \node [coordinate, right = 0cm of add2] (add2_out){};
+  \node [coordinate, right = 3.5cm of add2] (exit_point){};
+
+  \node [fifo, below right = 1cm and 0.5cm of add2] (fifo) {FIFO};
+  \node [coordinate, left = 0cm of fifo] (fifo_out){};
+  \node [coordinate, right = 0cm of fifo] (fifo_in){};
+
+
+  %% group %%
+ \begin{pgfonlayer}{background2}
+   \node[inner sep=10pt, fill=red!15, rounded corners, draw, thick,fit=(accum_sum) (accum_dreg) (feedback_point_1)] (accum) {};
+  \node[above left] at (accum.south east) {\textbf{accum}};
+\end{pgfonlayer}
+
+ \begin{pgfonlayer}{background1}
+   \node[inner sep=20pt, fill=yellow!25, rounded corners, draw, thick,fit=(accum) (add2) (fifo) (exit_point)] (ii_gen) {};
+  \node[above left, yshift=-1.1cm] at (ii_gen.north east) {\huge \textbf{ii\_gen}};
+\end{pgfonlayer}
+
+
+  % arrows
+  \path [line] (accum_sum_out) -- (accum_dreg_in);
+  \path [line] (ii_gen_in) node[transition, yshift=0.2cm, xshift=0.6cm] {\textbf{img\_in}} -- (accum_sum_in1);
+  \path [line] (accum_dreg_out) -- (add2_in1);
+  \path [line] (accum_dreg_out) -|  (feedback_point_1) -| (accum_sum_in2);
+  \path [line] (add2_out) -- (exit_point) |- (fifo_in);
+
+  \path [line] (fifo_out) -| (add2_in2);
+  \path [line] (add2_out) -- +(6cm,0cm) node[transition, yshift=0.2cm, xshift=-0.6cm] {\textbf{ii\_out}};
+\end{tikzpicture}

@@ -1,0 +1,90 @@
+
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.0cm, minimum height=1.0cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{dreg} = [draw, text centered, fill=blue!15, minimum width = 1.5cm,
+minimum height=1.5cm]
+\tikzstyle{frame_sum} = [draw, text centered, fill=blue!15, minimum width = 2.5cm,
+minimum height=1.5cm]
+
+\tikzstyle{square} = [draw, thick, fill=blue!15, circle, minimum size = 1cm, node distance = 2cm]
+\tikzstyle{mult} = [draw, thick, fill=blue!15, circle, minimum size = 1cm ,node distance = 2cm]
+\tikzstyle{sum} = [draw, thick, fill=blue!15, circle, minimum size= 1cm, node distance = 2cm]
+
+\begin{tikzpicture}[thick]
+
+  \node [frame_sum] (frame_sum_ii) {frame\_sum};
+  \node [coordinate, left = 0cm of frame_sum_ii] (frame_sum_ii_in){};
+  \node [coordinate, left = 2cm of frame_sum_ii_in] (ii_in){};
+  \node [coordinate, right = 0cm of frame_sum_ii] (frame_sum_ii_out){};
+
+  \node [square, right = 1.0cm of frame_sum_ii] (square_ii) {$X^2$};
+  \node [coordinate, left = 0cm of square_ii] (ii_square_in){};
+  \node [coordinate, right = 0cm of square_ii] (ii_square_out){};
+
+  \node [frame_sum, below = 2cm of frame_sum_ii] (frame_sum_sii) {frame\_sum};
+  \node [coordinate, left = 0cm of frame_sum_sii] (frame_sum_sii_in){};
+  \node [coordinate, left = 2cm of frame_sum_sii_in] (sii_in){};
+  \node [coordinate, right = 0cm of frame_sum_sii] (frame_sum_sii_out){};
+
+  \node [mult, right = 1.0cm of frame_sum_sii] (mult_sii) {$*$};
+  \node [coordinate, left = 0cm of mult_sii] (mult_sii_in1){};
+  \node [coordinate, below = 0cm of mult_sii] (mult_sii_in2){};
+  \node [coordinate, below = 1cm of mult_sii_in2] (mult_sii_const){};
+  \node [coordinate, right = 0cm of mult_sii] (mult_sii_out){};
+
+  \node [sum, below right = 0.75cm and 0.75cm of square_ii] (sub) {-};
+  \node [coordinate, above = 0cm of sub] (sub_in1){};
+  \node [coordinate, below = 0cm of sub] (sub_in2){};
+  \node [coordinate, right = 0cm of sub] (sub_out){};
+
+  \node [block_m, right = 0.75cm of sub] (shift) {$>>$};
+  \node [coordinate, left = 0cm of shift] (shift_in){};
+  \node [coordinate, right = 0cm of shift] (shift_out){};
+
+  \node [block_l, right = 1.5cm of shift] (sqrt_rom) {SQRT\_ROM};
+  \node [coordinate, left = 0cm of sqrt_rom] (addr_in){};
+  \node [coordinate, right = 0cm of sqrt_rom] (sqrt_out){};
+  \node [coordinate, right = 2cm of sqrt_out] (stddev_out){};
+
+  %% group %%
+ \begin{pgfonlayer}{background1}
+   \node[inner sep=20pt, fill=yellow!25, rounded corners, draw, thick,fit=(frame_sum_ii) (frame_sum_sii) (mult_sii_const) (sqrt_rom)] (accum) {};
+  \node[above left] at (accum.south east) {\huge \textbf{stddev}};
+\end{pgfonlayer}
+
+
+  % arrows
+  \path [line] (frame_sum_ii_out) -- (ii_square_in);
+
+  \path [line] (frame_sum_sii_out) -- (mult_sii_in1);
+  \path [line] (mult_sii_const) -- (mult_sii_in2) node[transition, yshift=-1.3cm, xshift=+0.05cm] {\small $frame\_width*frame\_height$};
+
+  \path [line] (ii_square_out) -| (sub_in1);
+  \path [line] (mult_sii_out) -| (sub_in2);
+
+  \path [line] (sub_out) -- (shift_in);
+  \path [line] (shift_out) node[transition, yshift=0.7cm, xshift=+0.6cm] {\small sqrt\_addr} -- (addr_in);
+
+  \path [line] (sqrt_out) -- (stddev_out) node[transition, yshift=0.3cm, xshift=-0.5cm] {\textbf{stddev}} ;
+
+  \path [line] (ii_in) node[transition, yshift=0.2cm, xshift=+0.6cm] {\textbf{ii\_in}} -- (frame_sum_ii_in);
+  \path [line] (sii_in) node[transition, yshift=0.2cm, xshift=+0.6cm] {\textbf{sii\_in}} -- (frame_sum_sii_in);
+
+  % \path [line] (accum_sum_out) -- (accum_dreg_in);
+  % \path [line] (ii_gen_in) node[transition, yshift=0.2cm, xshift=0.6cm] {\textbf{img\_in}} -- (accum_sum_in1);
+  % \path [line] (accum_dreg_out) -- (add2_in1);
+  % \path [line] (accum_dreg_out) -|  (feedback_point_1) -| (accum_sum_in2);
+  % \path [line] (add2_out) -- (exit_point) |- (fifo_in);
+
+  % \path [line] (fifo_out) -| (add2_in2);
+  % \path [line] (add2_out) -- +(6cm,0cm) node[transition, yshift=0.2cm, xshift=-0.6cm] {\textbf{ii\_out}};
+\end{tikzpicture}

@@ -8,9 +8,7 @@
 \tikzstyle{block_l} =[draw, text centered, fill=red!15, minimum width=2.5cm, minimum height=2.5cm]
 \tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
 \tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
-\tikzstyle{line} = [draw, decoration={markings,mark=at position 1 with {\arrow[scale=2.2,black]{>}}},
-    postaction={decorate},
-    shorten >=0.4pt]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
 
 \begin{tikzpicture}[thick]
   \node [block_m] (scale_counter) {scale\_counter};
@@ -40,7 +38,7 @@
   %% group %%
  \begin{pgfonlayer}{background}
   \node[inner sep=7pt, fill=yellow!25, rounded corners, inner ysep =30pt, draw, thick,fit=(scale_counter) (boundaries) (scale_ratio) (hopper) (sweeper) (addr_trans)] (ip_core) {};
-  \node[above left] at (ip_core.south east) {\huge rd\_addrgen};
+  \node[above left] at (ip_core.south east) {\huge \textbf{rd\_addrgen}};
 \end{pgfonlayer}
 
   % arrows
@@ -53,6 +51,6 @@
   \path [line] (hopper_out) node[transition, yshift=-0.25cm, xshift=0.4cm] {hop} -- (sweeper_hop_in);
 
   \path [line] (sweeper_out) node[transition, yshift=0.2cm, xshift=0.6cm] {sweep} -- (addr_trans_in);
-  \path [line] (addr_trans_out)-- +(1.5cm, 0) node[transition, yshift=0.3cm, xshift=-0.5cm] {rd\_addr} ;
+  \path [line] (addr_trans_out)-- +(1.5cm, 0) node[transition, yshift=0.3cm, xshift=-0.4cm] {\textbf{rd\_addr}} ;
 
 \end{tikzpicture}

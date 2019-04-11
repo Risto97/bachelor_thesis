@@ -1,0 +1,39 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=red!15, minimum width=3.5cm, minimum height=3.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{sum} = [draw, thick, fill=blue!15, circle, node distance = 2cm]
+\tikzstyle{square} = [draw, thick, fill=blue!15, circle, node distance = 2cm]
+\tikzstyle{dreg} = [draw, text centered, fill=blue!15, minimum width = 1.5cm,
+minimum height=1.5cm]
+\tikzstyle{fifo} = [draw, text centered, fill=blue!15, minimum width = 2.5cm,
+minimum height=1.5cm]
+
+\begin{tikzpicture}[thick]
+  \node [square] (square) {\textbf{ $X^2$}};
+  \node [coordinate, left = 0cm of square] (square_in);
+  \node [coordinate, right = 0cm of square] (square_out);
+
+  \node [block_l, rounded corners, right = 1cm of square] (ii_gen) {\Huge ii\_gen};
+  \node [coordinate, left = 0cm of ii_gen] (ii_gen_in);
+  \node [coordinate, right = 0cm of ii_gen] (ii_gen_out);
+
+%   %% group %%
+ \begin{pgfonlayer}{background2}
+   \node[inner sep=25pt, fill=yellow!25, rounded corners, draw, thick,fit=(square) (ii_gen) ] (accum) {};
+  \node[above left, xshift=3.2cm, yshift=-1.1cm] at (accum.north west) {\Huge \textbf{sii\_gen}};
+\end{pgfonlayer}
+
+
+  % arrows
+  \path [line] (-3cm, 0cm) node[transition, yshift=0.2cm, xshift=0.6cm] {\textbf{img\_in}}  -- (square_in);
+  \path [line] (square_out) -- (ii_gen_in);
+  \path [line] (ii_gen_out) -- +(3cm, 0cm) node[transition, yshift=0.3cm, xshift=-0.6cm] {\textbf{sii\_out}};
+\end{tikzpicture}

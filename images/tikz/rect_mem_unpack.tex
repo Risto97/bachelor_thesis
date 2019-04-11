@@ -1,0 +1,29 @@
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=red!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{line_s} = [draw, ->]
+\tikzstyle{line_st} = [draw,thick, ->]
+
+\begin{tikzpicture}
+  % draw the grid and the numbers
+  \draw (-1,-1) grid (9,9) foreach \i in {0,...,9}{
+    (\i-.5,9.5) node{\i} (-1.5,8.5-\i) node{\i}};
+
+  \node[text width=1.5cm] at (2.0,7.5) (A_coord) {\Large \textbf{A}};
+  \node[text width=1.5cm] at (5.0,7.5) (B_coord) {\Large \textbf{B}};
+  \node[text width=1.5cm] at (5.0,4.5) (C_coord) {\Large \textbf{D}};
+  \node[text width=1.5cm] at (2.0,4.5) (D_coord) {\Large \textbf{C}};
+
+  \path [line, blue] (1.75, 7.5) node[transition, yshift=0.3cm, xshift=+1.2cm] {width} -- (4.25, 7.5);
+  \path [line, blue] (1.50, 7.25) node[transition, yshift=-1.5cm, xshift=-0.6cm] {height} -- (1.5cm, 4.75);
+}
+
+\end{tikzpicture}
