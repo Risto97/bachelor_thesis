@@ -1,8 +1,14 @@
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
 \tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum hegiht = 1em]
 \tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=3cm, minimum height=3.5cm]
 \tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2cm]
 \tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
-\tikzstyle{line} = [draw, thick, -latex']
+\tikzstyle{line} = [draw, decoration={markings,mark=at position 1 with {\arrow[scale=2.2,black]{>}}},
+    postaction={decorate},
+    shorten >=0.4pt]
 
 \begin{tikzpicture}[thick]
   \node [block_l] (img_ram) {IMG RAM};
@@ -42,9 +48,11 @@
   \node [coordinate, above right = -1.0cm and 0cm of classifier] (detected_addr){};
   \node [coordinate, above right = -2.5cm and 0cm of classifier] (irq){};
 
-
-  \node[inner sep=7pt, inner ysep =30pt, draw,dashed, thick,fit=(img_ram) (rd_addrgen) (ii_gen) (features_mem) (sii_gen) (frame_buffer) (stddev) (classifier)] (ip_core) {};
+  %% group %%
+ \begin{pgfonlayer}{background}
+  \node[inner sep=7pt, fill=yellow!25, rounded corners, inner ysep =30pt, draw, thick,fit=(img_ram) (rd_addrgen) (ii_gen) (features_mem) (sii_gen) (frame_buffer) (stddev) (classifier)] (ip_core) {};
   \node[above left] at (ip_core.south east) {\huge Cascade Classifier IP core};
+\end{pgfonlayer}
 
   % arrows
   \path [line] (rd_addr_addr_out)  |- (img_ram_addr_in) node[transition, xshift=0.8cm, yshift=0.25cm] {rd\_addr};
@@ -58,6 +66,6 @@
   \path [line] (stddev_out) -- +(0.5cm, 0) node[transition, yshift=-0.2cm, xshift=0.1cm] {stddev} |- (classifier_stddev);
   \path [line] (rects_addr) node[transition, yshift=+0.2cm, xshift=-1.1cm] {rects\_addr}  -- +(-0.5cm, 0cm) |- (frame_buffer_rect_addr);
   \path [line] (rects_weights) node[transition, yshift=+0.2cm, xshift=+1.2cm] {rects\_weights}  -- +(+0.5cm, 0cm) |- (classifier_weights);
-  \path [line] (detected_addr) -- +(3.0cm, 0cm) node[transition, yshift=0.25cm, xshift=-1.1cm]{\large detected\_addr} ;
+  \path [line] (detected_addr) -- +(3.0cm, 0cm) node[transition, yshift=0.25cm, xshift=-1.1cm]{\large detect\_addr} ;
   \path [line] (irq) -- +(3.0cm, 0cm) node[transition, yshift=0.25cm, xshift=-0.4cm]{\large irq} ;
 \end{tikzpicture}

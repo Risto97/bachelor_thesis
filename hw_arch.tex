@@ -1,28 +1,57 @@
 \section{Arhitektura hardvera}
 asdasd
 
-\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum hegiht = 1em]
-\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=3cm, minimum height=3.5cm]
-\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2cm]
-\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
-\tikzstyle{line} = [draw, thick, -latex']
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{bdp/hw_arch/top.png}
-  \caption{Portovi IP jezgra}
-  \label{hw_arch_top}
-\end{figure}
-
-
-% \begin{figure}[h]
-%    \input{images/bdp/hw_arch/hw_arch.tex}[h]
-%   \caption{tikz slika}
-%   \label{tikz1}
-% \end{figure}
 \begin{figure}[h]
 \centering{
   \scalebox{0.8}{
     \input{images/bdp/hw_arch/hw_arch.tex}
   }}
+\caption{Arhitektura hardvera kaskadnog klasifikatora}
+\label{hw_arch_top}
+\end{figure}
+
+Na slici(\ref{hw_arch_top}) prikazani su krupni moduli arhitekture hardvera.
+Sa izostavljenim detaljima impementacije pojedinačnih modula. \\
+
+\subsection{Interfejsi IP jezgra}
+\emph{IP} jezgro se povezuje pomoću 3 interfejsa:
+
+\begin{itemize}
+  \item Ulazni interfejs \textbf{img\_in} sastoji se od 8-bitnog podatka
+    vrednosti piksela slike u \emph{grayscale} formatu (nijanse sive).
+  \item Izlazni interfejs \textbf{detect\_addr} ukoliko jezgro detektuje lice na slici
+    postaviće x i y koordinate na ovom interfejsu.
+  \item Izlazni interfejs \textbf{irq} je signal koji označava završetak obrade slike i
+    signalizira da je jezgro spremno za novu sliku.
+    Namenjen da se koristi kao prekidni signal za procesor.
+\end{itemize}
+
+\subsection{Modul IMG RAM}
+
+Modul \textbf{IMG RAM} je zadužen za skladištenje slike koja se obrađuje.
+Sastoji se od RAM memorije i brojača za generisanje adrese za upis. \\
+Nakon primljenog podatka na ulazu brojač adrese upisa se poveća za 1. \\
+Skladištena slika je u 8-bitnom formatu i predstavlja grayscale vrednost piksela
+originalne slike. \\
+Veličina memorije je $width*height*8$ bit. Za dimenziju slike 240x320
+veličina memorije je $614400$ bita. \\
+
+Komunicira sa okolinom pomoću 3 interfejsa:
+\begin{itemize}
+  \item Ulazni interfejs \textbf{img\_in} ekvivalentan je sa istoimenim
+    interfejsom na višem nivou hijerarhije.
+  \item Ulazni interfejs \textbf{rd\_addr} predstavlja linearnu adresu
+    generisanu od strane \textbf{rd\_addrgen} modula. Koristi se za čitanje
+    podataka iz RAM memorije.
+  \item Izlazni interfejs \textbf{img\_out} predstavlja iščitane podatke iz RAM memorije.
+\end{itemize}
+
+\subsection{Modul rd\_addrgen}
+
+asd
+
+\begin{figure}[h]
+    \input{images/bdp/hw_arch/rd_addrgen.tex}
+\caption{Arhitektura hardvera kaskadnog klasifikatora}
+\label{hw_arch_top}
 \end{figure}

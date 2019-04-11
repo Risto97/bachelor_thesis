@@ -1,0 +1,58 @@
+
+
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=red!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, decoration={markings,mark=at position 1 with {\arrow[scale=2.2,black]{>}}},
+    postaction={decorate},
+    shorten >=0.4pt]
+
+\begin{tikzpicture}[thick]
+  \node [block_m] (scale_counter) {scale\_counter};
+  \node [coordinate, right = 0cm of scale_counter] (scale_counter_out){};
+
+  \node [block_m, above right = 0cm and 1.25cm of scale_counter] (boundaries) {boundaries};
+  \node [coordinate, left = 0cm of boundaries] (boundaries_in){};
+  \node [coordinate, right = 0cm of boundaries] (boundaries_out){};
+
+  \node [block_m, below right = 0cm and 1.25cm of scale_counter] (scale_ratio) {scale\_ratio};
+  \node [coordinate, left = 0cm of scale_ratio] (scale_ratio_in){};
+  \node [coordinate, right = 0cm of scale_ratio] (scale_ratio_out){};
+
+  \node [block_l, right = 2cm of boundaries] (hopper) {\Large hopper};
+  \node [coordinate, left = 0cm of hopper] (hopper_boundaries_in){};
+  \node [coordinate, below = 0cm of hopper] (hopper_out){};
+
+  \node [block_l, right = 2cm of scale_ratio] (sweeper) {\Large sweeper};
+  \node [coordinate, above = 0cm of sweeper] (sweeper_hop_in){};
+  \node [coordinate, left = 0cm of sweeper] (sweeper_scale_in){};
+  \node [coordinate, right = 0cm of sweeper] (sweeper_out){};
+
+  \node [block_m, right = 1.25cm of sweeper] (addr_trans) {addr\_trans};
+  \node [coordinate, left = 0cm of addr_trans] (addr_trans_in){};
+  \node [coordinate, right = 0cm of addr_trans] (addr_trans_out){};
+
+  %% group %%
+ \begin{pgfonlayer}{background}
+  \node[inner sep=7pt, fill=yellow!25, rounded corners, inner ysep =30pt, draw, thick,fit=(scale_counter) (boundaries) (scale_ratio) (hopper) (sweeper) (addr_trans)] (ip_core) {};
+  \node[above left] at (ip_core.south east) {\huge rd\_addrgen};
+\end{pgfonlayer}
+
+  % arrows
+  \path [line] (scale_counter_out) -- +(0.5cm, 0) node[transition, yshift=0cm, xshift=1.1cm] {scale\_num} |- (boundaries_in);
+  \path [line] (scale_counter_out) -- +(0.5cm, 0) |- (scale_ratio_in);
+
+  \path [line] (boundaries_out) node[transition, yshift=0.2cm, xshift=1.0cm] {boundary} -- (hopper_boundaries_in);
+  \path [line] (scale_ratio_out) node[transition, yshift=0.2cm, xshift=0.8cm] {scale} -- (sweeper_scale_in);
+
+  \path [line] (hopper_out) node[transition, yshift=-0.25cm, xshift=0.4cm] {hop} -- (sweeper_hop_in);
+
+  \path [line] (sweeper_out) node[transition, yshift=0.2cm, xshift=0.6cm] {sweep} -- (addr_trans_in);
+  \path [line] (addr_trans_out)-- +(1.5cm, 0) node[transition, yshift=0.3cm, xshift=-0.5cm] {rd\_addr} ;
+
+\end{tikzpicture}
