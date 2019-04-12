@@ -5,6 +5,8 @@
 \graphicspath{ {./images/} }
 \usepackage{subfig}
 \usepackage{float}
+\usepackage{listings}
+\usepackage{xcolor}
 
 \usepackage{array}
 \usepackage{url}
@@ -44,3 +46,31 @@
 \newcommand{\QuestaSim}{Questa Sim\footnote{\url{https://www.mentor.com/products/fv/questa/}}}
 
 \newcommand{\ZTurn}{MYIR Z-Turn Board\footnote{\url{http://www.myirtech.com/list.asp?id=502}}}
+
+%%% code style %%%
+
+\renewcommand{\lstlistingname}{Primer}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+\lstdefinestyle{customc}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  frame=L,
+  xleftmargin=\parindent,
+  language=C,
+  showstringspaces=false,
+  basicstyle=\normal\ttfamily,
+  keywordstyle=\bfseries\color{green!40!black},
+  commentstyle=\itshape\color{purple!40!black},
+  identifierstyle=\color{blue},
+  stringstyle=\color{orange},
+}
+
+\lstset{
+  escapechar=@,
+  style=customc,
+  frame=tb,
+  numbers=left,
+  numberstyle=\color{mygray},
+}

@@ -1,5 +1,19 @@
 \section{Arhitektura hardvera}
-asdasd
+
+\subsection{Uvod}\label{hw_arch_intro}
+
+U ovom poglavlju biće opisana arhitektura hardvera koja je projektovana. \\
+Postoje razlike između implementiranih arhitektura u SystemVerilog-u i PyGears-u. \\
+Pošto obe metodologije sa sobom nose neke karakteristike koje otežavaju ili
+olakšavaju određene principe prilikom projektovanja, ove razlike će biti opisane
+u kasnijim poglavljima. \\
+
+Iako su razlike između ove dve implementacije male opis u ovom poglavlju će biti
+bliži implementaciji u PyGears-u koja je novija i ispravljene su neke sistemske
+greške. \\
+
+Arhitektura će biti opisana na nivou modula od kojih se sastoji njihovih
+portova, funkcija koje obavljaju i eventualno kritičnih funkcionalnih i memorijskih jedinica.
 
 \begin{figure}[H]
 \centering{
@@ -10,8 +24,7 @@ asdasd
 \label{hw_arch_top}
 \end{figure}
 
-Na slici(\ref{hw_arch_top}) prikazani su krupni moduli arhitekture hardvera.
-Sa izostavljenim detaljima impementacije pojedinačnih modula. \\
+Na slici(\ref{hw_arch_top}) prikazan je uprošćen blok dijagram realizovanog IP jezgra.
 
 \subsection{Interfejsi IP jezgra}
 \emph{IP} jezgro se povezuje pomoću 3 interfejsa:
@@ -48,13 +61,70 @@ Komunicira sa okolinom pomoću 3 interfejsa:
 
 \subsection{Modul rd\_addrgen}
 
-asd
+Modul \textbf{rd\_addrgen} je zadužen za generisanje adrese za čitanje iz
+\textbf{img\_ram} modula. \\
+Blok dijagram ovog modula prikazan je na slici (\ref{rd_addrgen_bd}). \\
 
 \begin{figure}[H]
     \input{images/tikz/rd_addrgen.tex}
-\caption{Arhitektura hardvera kaskadnog klasifikatora}
+\caption{Blok dijagram \textbf{rd\_addrgen} modula}
 \label{rd_addrgen_bd}
 \end{figure}
+
+Pored generisanja adrese pomoću ovog modula je dodatno rešeno i skaliranje slike opisano u sekciji
+\ref{image_scaling}. \\
+
+\subsubsection{Scale\_counter}\label{scale_counter_sec}
+\textbf{Scale\_counter} je brojač koji se poveća za jedan kada klasifikator
+završi obradu slike na trenutnom nivou piramide prikazanoj na slici
+(\ref{image_pyramid}) sekciji \ref{image_scaling}. \\
+
+\subsubsection{Boundaries}\label{boundaries_sec}
+\textbf{Boundaries} kao ulaz dobija trenutni stepen skaliranja
+\textbf{scale\_num} i na osnovu njega na izlazu daje \textbf{X} i \textbf{Y} granice do kojih
+\textbf{hopper} treba da broji.
+Ove granice osiguravaju ispravno generisanje adrese, odnosno obezbeđuju da
+izlazna adresa nikad ne iskoči iz opsega \textbf{img\_ram} memorije. \\
+Realizovan je pomoću multipleksera i softverski izračunatih konstantnih
+vrednosti granica. \\
+
+\subsubsection{Scale\_ratio}\label{scale_ratio_sec}
+\textbf{Scale\_ratio} ima ulogu da dostavi \textbf{sweeper}-u potrebne parametre za
+računanje skalirane adrese.
+Realizovan je isto kao i \textbf{boundaries} modul. \\
+
+\subsubsection{Hopper}\label{hopper_sec}
+\textbf{Hopper} se može zamisliti kao dvostruka ugnježdena for petlja gde
+iteratori petlje predstavljaju koordinate \textbf{X} i \textbf{Y}. \\
+Prvo se iterira po \textbf{X} kordinati pa po \textbf{Y}.
+
+\begin{lstlisting}[language=C++,caption={Primer \textbf{hopper}-a u \textbf{C}-u},captionpos=b, label=hopper_code]
+  for(int y = 0; y < boundary_y[scale_num]; y++){
+    for(int x = 0; x < boundary_x[scale_num]; x++){
+      // Sweeper
+    }
+  }
+\end{lstlisting}
+
+Na primeru (\ref{hopper_code}) prikazana je implementacija \textbf{hopper}-a u
+\textbf{C}-u.
+Može se videti da granice \textbf{hopper}-a zavise od promenljivih
+\textbf{boundary\_x} i \textbf{boundary\_y} koji se indeksiraju preko
+\textbf{scale\_num} promenljive opisane u sekcijama (\ref{boundaries_sec},
+\ref{scale_counter_sec}). \\
+
+Na slikama (\ref{hop_sweep1}, \ref{hop_sweep2}) je prikazan rad hopper-a i
+sweeper-a.
+Plavi kružići predstavljaju piksele za koje će
+rd\_addrgen generisati adresu za trenutno stanje hopper-a. \\
+Gornji levi kružić je koordinata trenutnog položaja hopper-a.
+Crevnom strelicom je obeleženo iteriranje hopper-a kroz sliku. \\
+Na slici (\ref{hop_sweep2}) može se videti trenutak kada hopper dostiže granicu
+boundary\_x nakon čega prelazi u novi red, uvećava Y koordinatu a X koordinatu
+postavlja na početni položaj. \\
+
+Nakon što hopper dostigne obe granice boundary\_x i boundary\_y završen je
+trenutni stepen skaliranja slike i potrebno je uvećati scale\_num za jedan.
 
 \begin{figure}[H]
   \centering
@@ -62,7 +132,7 @@ asd
     \input{images/tikz/hop_sweep/hop_sweep1.tex}
     \input{images/tikz/hop_sweep/hop_sweep2.tex}
     }
-\caption{Arhitektura hardvera kaskadnog klasifikatora}
+\caption{Način rada \textbf{hopper} i \textbf{sweeper} komponenti.}
 \label{hop_sweep1}
 \end{figure}
 
@@ -73,23 +143,115 @@ asd
     \input{images/tikz/hop_sweep/hop_sweep3.tex}
     \input{images/tikz/hop_sweep/hop_sweep4.tex}
     }
-\caption{Arhitektura hardvera kaskadnog klasifikatora}
+\caption{Prelazak \textbf{hopper}-a u novi red.}
 \label{hop_sweep2}
 \end{figure}
 
-neki texto
+\newpage
+
+\subsubsection{Sweeper}\label{sweeper_sec}
+Slično kao hopper i sweeper se može predstaviti kao dve ugnježdene for petlje. \\
+Ponovo se prvo iterira po X koordinati pa onda po Y.
+
+\begin{lstlisting}[language=C++,caption={Primer \textbf{sweeper}-a u \textbf{C}-u},captionpos=b, label=sweeper_code]
+  int x, y;
+  // hopper
+  for(int hop_y = 0; hop_y < boundary_y[scale_num]; hop_y++){
+    for(int hop_x = 0; x < boundary_x[scale_num]; hop_x++){
+      // sweeper
+      for(y = hop_y; y < hop_y+feature_height; y++){
+        for(x = hop_x; x < hop_x+feature_width; x++){
+          // scale address
+          // translate to linear address
+        }
+      }
+    }
+  }
+\end{lstlisting}
+
+Kao što se vidi na primeru (\ref{sweeper_code}) hopper i sweeper se zajedno mogu
+predstaviti kao četiri ugnježdene for petlje. \\
+Sweeper će početnu vrednost svojih X i Y promenljivih uzeti od trenutne
+vrednosti hopper koordinata, zatim će se iterirati feature\_width i
+feature\_height puta. \\
+Na slikama (\ref{hop_sweep1}, \ref{hop_sweep2}) prelazak sweeper-a po slici je
+prikazan horizontalnim i dijagonalnim strelicama.
+Dok je plavim kružićima predstavljeni pikseli koje sweeper prebriše za jedan
+položaj hopper-a.
+
+\newpage
+
+\subsubsection{Skaliranje adrese}\label{address_scaling_sec}
+
+Unutar sweeper-a je implementirano i skaliranje adrese u svrhu skaliranja slike
+objašnjeno u sekciji \ref{image_scaling}. \\
+Potrebno je množiti adresu sa decimalnim faktorom (npr. $1.2$, $1.33$), kako je
+u hardveru množenje sa decimalnim brojevima sa pokretnom tačkom skupa operacija,
+efikasnije je odraditi množenje sa fiksnom tačkom. \\
+To je odrađeno tako što celobrojni faktor unapred softverski izračunat i smešten
+u scale\_ratio modul, isto tako je i broj pomeranja u desno dobijene binarne
+vrednosti unapred poznat.
+Pa je jednostavno odraditi množenje sa fiksnom tačkom. \\
+
+Ovako skalirana adresa prikazana je na slici (\ref{hop_sweep_scale}).
+Može se videti da će u ovom slučaju svaka četvrta tačka biti preskočena.
+Na taj način će se dobiti manja slika od originalne, u ovom primeru od početne
+slike $10*10$ dobija se slika $8*8$. \\
+Na taj način objekti koji su izgledali veći na originalnoj slici će izgledati
+manji na skaliranoj slici, što nam je potrebno kako bi dobili invarijantnost
+veličine opisane u sekciji \ref{image_scaling}.
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.9}{
+  \scalebox{0.7}{
     \input{images/tikz/hop_sweep/hop_sweep_scale.tex}
     }
-\caption{Rezultat skaliranja adrese}
+\caption{Posledica skaliranja adrese.}
 \label{hop_sweep_scale}
 \end{figure}
 
+\subsubsection{Modul addr\_trans}\label{addr_trans_sec}
+
+Konačno je potrebno konvertovati adresu predstavljenu koordinatama (y, x) u
+linearnu adresu, pošto se RAM memorija adresira linearno. Ovo obavlja
+addr\_trans u hardveru. \\
+Translaciju je jednostavno uraditi pomoću seledeće formule.
+
+\begin{equation}
+  \Scale[1.2]{lin\_addr = (y * img\_width) + x}
+  \label{IntegralImage_eq2}
+\end{equation}
+
+Gde su y i x koordinate iz sweeper-a a img\_width je parametar koji označava
+širinu slike.
+
+\newpage
+
 \subsection{Modul ii\_gen i sii\_gen}
-asdasd
+
+\subsubsection{Odabir algoritma}\label{ii_alg_sel_sec}
+
+Jedan od kritičnih delova Viola-Jones algoritma je generisanje integralne slike
+opisane u poglavlju \ref{ii_sec}. \\
+Isto tako se ispostavlja da i u hardverskoj implementaciji generisanje
+integralne slike ima veliki uticaj na performanse i potrebne hardverske resurse sistema. \\
+
+Kao izbor možemo izabrati sekvencijalni ili paralelni algoritam. \\
+Ukoliko bi se odabrao paralelni algoritam koji može da računa više piksela u paraleli
+povećanje resursa bi se drastično odrazilo na img\_ram i frame\_buffer memorije.
+Ali bi dobili bolje performanse sistema. \\
+Kako bi implementacija paralelnog algoritma povećala kompleksnost ne samo ovog
+modula nego i okolnih komponenti, u ovom projektu on neće biti razmatran.
+
+\subsubsection{Sekvencijalna implementacija generatora integralne slike}\label{ii_seq_alg_sec}
+
+U ovoj arhitekturi odabran je sekvencijalni algoritam generisanja integralne
+slike koji odgovara jednačini(\ref{IntegralImage_eq2}) iz sekcije \ref{ii_sec}.
+\\
+Prednosti ovog algoritma u odnosu na paralelni je manji memorijski zahtevi na
+ulazu i izlazu, potrebno manje funkcionalnih jedinica i unutrašnje memorije. A
+mana je manja brzina. \\
+Konkretno ovaj algoritam može da izračuna jedan piksel svaki takt. \\
 
 \begin{figure}[H]
   \centering
@@ -97,8 +259,41 @@ asdasd
     \input{images/tikz/ii_gen.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
+
+Na slici(\ref{ii_gen}) prikazana je uprošćena šema generatora integralne slike.
+\\
+
+Na ulazu module je port img\_in koji predstavlja piksele slike pročitane iz
+img\_ram memorije. \\
+
+Pikseli u redu se akumuliraju pomoću sabirača i registra unutar accum modula.
+Na slici je izostavljeno da se registar dreg resetuje posle dolaska poslednjeg
+piksela u redu slike. \\
+
+Nakon toga akumulirana vrednost se sabira sa vrednošću FIFO bafera koji sadrži
+vrednost piksela integralne slike iz predhodnog reda.
+Zatim prosleđuje na izlaz i ponovo upisuje u FIFO bafer kao vrednost izračunate
+integralne slike.\\
+
+\noindent
+Zbog potreba algoritma FIFO bafer je modifikovan na sledeći način:
+\begin{itemize}
+  \item Dodat je PRELOAD parametar koji pomera pokazivač za upis na vrednost
+    širine prozora (feature\_width) prilikom reseta. Ovo je potrebno da bi se
+    obezbedilo čitanje nula iz bafera kada se obrađuje prvi red slike.
+  \item FIFO se resetuje kada je završeno računanje celog prozora.
+\end{itemize}
+
+\subsubsection{Generator kvadratne integralne slike}\label{sii_gen_sec}
+
+Generator kvadratne integralne slike je potreban za raćunanje standardne
+devijacije prozora što je opisano u sekciji \ref{lumi_inv_sec}. \\
+Generisanje kvadratne integralne slike je jednostavno uz gotov generator
+integralne slike.
+Potrebno je kvadrirati ulazne piksele i dovesti ih na generator integralne slike
+kao na slici(\ref{sii_gen}).
 
 \begin{figure}[H]
   \centering
@@ -106,7 +301,7 @@ asdasd
     \input{images/tikz/sii_gen.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{sii_gen}
 \end{figure}
 
 \subsection{Modul framebuffer}
@@ -117,7 +312,7 @@ asdasd
     \input{images/tikz/frame_buffer.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
 
 \subsection{Modul stddev}
@@ -128,7 +323,7 @@ asdasd
     \input{images/tikz/stddev.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
 
 \subsection{Modul features\_mem}
@@ -139,7 +334,7 @@ asdasd
     \input{images/tikz/rect_mem_struct.tex}
 %     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
 
 \begin{figure}[H]
@@ -148,7 +343,7 @@ asdasd
     \input{images/tikz/rect_mem_unpack.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
 
 \begin{figure}[H]
@@ -157,7 +352,7 @@ asdasd
     \input{images/tikz/features_mem.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
 
 \subsection{Modul classifier}
@@ -169,5 +364,5 @@ asdasd
     \input{images/tikz/classifier.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
-\label{ii\_gen}
+\label{ii_gen}
 \end{figure}
