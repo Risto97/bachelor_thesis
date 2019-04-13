@@ -288,7 +288,7 @@ Zbog potreba algoritma FIFO bafer je modifikovan na sledeći način:
 
 \subsubsection{Generator kvadratne integralne slike}\label{sii_gen_sec}
 
-Generator kvadratne integralne slike je potreban za raćunanje standardne
+Generator kvadratne integralne slike je potreban za računanje standardne
 devijacije prozora što je opisano u sekciji \ref{lumi_inv_sec}. \\
 Generisanje kvadratne integralne slike je jednostavno uz gotov generator
 integralne slike.
@@ -304,56 +304,239 @@ kao na slici(\ref{sii_gen}).
 \label{sii_gen}
 \end{figure}
 
-\subsection{Modul framebuffer}
+\newpage
+
+\subsection{Modul frame\_buffer}
+
+Potrebno je obezbediti da se generisana integralna slika može pročitati od
+strane klasifikatora u nasumičnom maniru.
+Kako bi se to obezbedilo potrebno je skladištiti integralnu sliku u lokalnu RAM
+memoriju. \\
 
 \begin{figure}[H]
   \centering
   \scalebox{1.0}{
     \input{images/tikz/frame_buffer.tex}
     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
+\caption{Blok dijagram frame\_buffer-a realizovanog sa 3 jedno-portne RAM memorije.}
+\label{frame_buffer_bd}
 \end{figure}
 
+U ovu svrhu je projektovana komponenta frame\_buffer.
+Sastoji se od brojača za adresu upisa i RAM memorije.
+Brojač adrese upisa se inkremetuje za jedan nakon svakog primljenog podatka. \\
+Potrebna veličina RAM memorije je data sledećim vezama:
+
+\begin{equation}
+  \Scale[1.2]{ size(bit) = frame\_width * frame\_height * w\_ii}
+  \label{frame_buffer_eq1}
+\end{equation}
+
+\begin{equation}
+  \Scale[1.2]{ w\_ii = ceil(log_2(frame\_width * frame\_height * 2^{w\_img}))}
+  \label{frame_buffer_eq2}
+\end{equation}
+
+Gde je frame\_width i frame\_height širina i visina obeležja modela, w\_ii je
+širina magistrale integralne slike, a w\_img ulazna širina magistrale piksela
+slike. \\
+
+Radi ubrzavanja rada klasifikatora možemo računati sva tri pravougaonika (\ref{haar_features_sec}) u paraleli.
+Da bi se to obezbedilo potrebno je čitati u istom taktu tri vrednosti iz
+frame\_buffer memorije.
+Kako je više-portna memorija skupa i retko se nalazi u FPGA čipovima moguće
+rešenje je koristiti tri jedno-portne memorije.
+Ovo će kao rezultat zauzeti tri puta više RAM memorije na čipu.\\
+
+Alat za sintezu uglavnom može da odradi transformaciju i da od jedne tro-portne
+memorije napravi tri jedno-portne.
+Ali se preporučuje da se ekslicitno instancioniraju tri memorije i pridržava
+Synthesis Guideline-a npr. Xilinx \cite{XST}. \\
+Primer prikazan na slici(\ref{frame_buffer_bd}).
+
 \subsection{Modul stddev}
+
+Računanje standardne devijacije prozora je potrebno kako bi se smanjio uticaj
+različitog osvetljenja lica na slikama. \\
+Za ovo je zadužen modul stddev. U sledećem primeru prikazano je računanje
+standardne devijacije u C-u.
+
+\begin{lstlisting}[language=C++,caption={Primer računanja standardne devijacije u \textbf{C}-u},captionpos=b, label=stddev_code]
+  long calcStddev(long sii[FRAME_HEIGHT][FRAME_WIDTH],
+                  long ii[FRAME_HEIGHT][FRAME_WIDTH]){
+
+    long mean, stddev;
+
+    mean = ii[0][0] + ii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - ii[0][FRAME_WIDTH-1] - ii[FRAME_HEIGHT-1][0];
+
+    stddev = sii[0][0] + sii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - sii[0][FRAME_WIDTH-1] - sii[FRAME_HEIGHT-1][0];
+
+    stddev = (stddev * (FRAME_WIDTH-1)*(FRAME_HEIGHT-1));
+    stddev = stddev - (mean*mean);
+    stddev = getSqrt(stddev);
+    return stddev;
+  }
+\end{lstlisting}
+
+Za računanje standardne devijacije potrebni su nam ivice prozora integralne i
+kvadratne integralne slike, što se vidi u liniji 6 i 8
+primera(\ref{stddev_code}). \\
+Sabiranjem gornjeg levog i donjeg desnog piksela zatim oduzimanje gornjeg desnog
+i donjeg levog integralne slike dobijamo sumu piksela celog prozora. \\
+Ako pogledamo primer u C-u vidimo da imamo operacije sabiranja, oduzimanja,
+kvadriranja  promenljivih, zatim množenje sa konstantom. \\
+Sa ovim operacijama većina alata za sintezu nema problem prilikom mapiranja i
+većina FPGA čipova ima potrebne funkcionalne jedinice. \\
+
+Konačno potrebno je odraditi kvadratni koren u liniji 12. \\
+Ovo je operacija koju većina alata za automatsku sintezu ne mogu implementirati
+na FPGA čipovima, pa je potrebno pronaći dobru aproksimaciju. \\
+
+U ovom projektu je odlučeno koristiti lookup tabelu. \\
+Za unapred definisani opseg vrednosti operanda za korenovanje softverski su
+izračunate vrednosti kvadratnog korena i smeštene u listu. \\
+Prilikom softverske analize odlučeno je da je 256 vrednosti korena dovoljno za ispravan
+rad celog sistema, uz minimalan gubitak pouzdanosti. \\
 
 \begin{figure}[H]
   \centering
   \scalebox{0.9}{
     \input{images/tikz/stddev.tex}
     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
+\caption{Blok dijagram stddev modula.}
+\label{stddev_bd}
 \end{figure}
+
+Na slici(\ref{stddev_bd}) prikazan je blok dijagram projektovanog hardverskog
+modula na osnovu primera(\ref{stddev_code}}).
+Operaciju sabiranja piksela unutar prozora obavljaju frame\_sum moduli.
+Mogu se videti i operator kvadriranja, množenja zatim i oduzimanja kao u
+prethodnom primeru. \\
+Lookup tabela je implementirana kao ROM memorija, nazvana SQRT\_ROM sa 256 lokacija.
 
 \subsection{Modul features\_mem}
 
-\begin{figure}[H]
-  \centering
-%   \scalebox{0.9}{
-    \input{images/tikz/rect_mem_struct.tex}
-%     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
-\end{figure}
+Svako obeležje u modelu se sastoji od najviše tri pravougaonika što je
+objašnjeno u sekciji \ref{haar_features_sec}. \\
+Svaki pravougaonik je definisan sa četiri koordinate (A, B, C, D) i sa težinom
+njegove površine. \\
+
+Zbog uštede memorije u hardverskoj implementaciji, moguće je svaki pravougaonik predstaviti koordinatom jedne njegove tačke zatim
+širinom i visinom pravougaonika.
+Ostale tačke je moguće izračunati pomoću ovih podataka. \\
+Na ovaj način se vrši ušteda memorije, ali se uvodi potreba za množačima i
+sabiračima u hardveru.
+U ovom slučaju zbog velikog broja obeležja (2913 u testiranom modelu \ref{haarcascade_frontal_sec}) ušteda
+memorije je značajna, a dodatni sabirači i množači ne unose veliku cenu u sistem.
 
 \begin{figure}[H]
   \centering
   \scalebox{0.8}{
     \input{images/tikz/rect_mem_unpack.tex}
     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
+\caption{Reprezentacija pravougaonika u obeležju.}
+\label{rect_repr_graph}
 \end{figure}
+
+Sa slike(\ref{rect_repr_graph}) mogu se videti potrebni parametri za
+reprezentaciju pravougaonika. \\
+Kao referentu koordinatu izabrana je tačka A od koje se meri širina i visina
+pravougaonika kao na slici. \\
+Kako je za adresiranje podatka iz RAM-a potrebna linearna adresa kao što je
+objašnjeno u sekciji(\ref{addr_trans_sec}) koordinata tačke A je linearizovana u
+softveru. \\
+Ostale koordinate moguće je dobiti na sledeći način:
+
+\setlength{\belowdisplayskip}{0pt} \setlength{\belowdisplayshortskip}{0pt}
+\setlength{\abovedisplayskip}{0pt} \setlength{\abovedisplayshortskip}{0pt}
+
+\begin{equation}
+    \Scale[1.1]{ B = A * width}
+    \label{rects_calc_coords_B}
+\end{equation}
+\begin{equation}
+  \Scale[1.1]{ D = (A + width) + (height * FRAME\_WIDTH)}
+  \label{rects_calc_coords_D}
+\end{equation}
+\begin{equation}
+  \Scale[1.1]{ C = (A + width) + (height * FRAME\_WIDTH) - width}
+  \label{rects_calc_coords_C}
+\end{equation}
+
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{center}
+  \centering
+    \begin{tabular}{| P{1.5cm} | P{2.5cm} | P{2cm} | P{2cm} | P{4cm} |}
+    \hline
+     N & Packed value(20 bit) & Height (5bit) & Width (5bit) & A linear coord (10bit) \\ \hline
+      0 &0x1A989 & 9 & 12 & 106 \\ \hline
+      1 &0x1A987 & 7 & 12 & 106 \\ \hline
+      2 &0x39249 & 9 & 18 & 228 \\ \hline
+      3 &0x72926 & 19 & 9 & 458 \\ \hline
+      $.$ & $.$ & $.$ & $.$ & $.$ \\
+      $.$ & $.$ & $.$ & $.$ & $.$ \\
+      $.$ & $.$ & $.$ & $.$ & $.$ \\ \hline
+      feature num - 1 &0x088d6 & 22 & 6 & 34 \\ \hline
+    \end{tabular}
+    \captionof{table}{Struktura memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_struct}
+\end{center}
+
+Na tabeli(\ref{rect_rom_struct}) je prikazana strukura zapakovane memorije
+rect\_ROM \\
+U prvoj koloni \textbf{N} su adrese lokacija, kojih ima features\_num (2913 u modelu
+\ref{haarcascade_frontal_sec}). \\
+U drugoj koloni \textbf{Packed value(20 bit)} je zapakovana vrednost memorijske lokacije na
+adresi u heksadecimalnom zapisu. \\
+U trećoj i četvrtoj koloni se nalaze \textbf{height} i \textbf{width}
+raspakovane vrednosti visine i širine pravougaonika. \\
+U poslednjoj koloni se nalazi \textbf{A linear coord} raspakovana vrednost
+linearne koordinate A. \\
+
+Pored rect\_ROM memorije potrebna je weight\_ROM memorija koja će čuvati
+vrednosti težina za svaki pravougaonik.
 
 \begin{figure}[H]
   \centering
   \scalebox{0.8}{
     \input{images/tikz/features_mem.tex}
     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
+\caption{Blok dijagram features\_mem modula.}
+\label{features_mem_bd}
 \end{figure}
+
+Na slici(\ref{features_mem_bd}) je prikazan uprošćen blok dijagram features\_mem
+modula. \\
+Komponenta \textbf{feature\_counter} generiše adresu za čitanje iz ROM memorija.
+\\
+Postoje po 3 \textbf{rect\_ROM} i \textbf{weight\_ROM} memorije prethodno
+opisane, po jedna za svaki pravougaonik u obeležju. \\
+Komponenta \textbf{calc\_coords} vrši raspakivanje memorije opisane u
+tablici(\ref{rect_rom_struct}) na način opisan
+formulama(\ref{rects_calc_coords_B}, \ref{rects_calc_coords_D},
+\ref{rects_calc_coords_C}}). \\
+
+Konačno može se izračunati potrebna memorija u slučaju modela opisanog u
+sekciji(\ref{haarcascade_frontal_sec}). \\
+
+\newcommand{\featureNum}{2913}
+\newcommand{\rectNum}{3}
+\newcommand{\wWeight}{3}
+\newcommand{\wRect}{20}
+\FPeval{\result}{clip(\featureNum*\rectNum*\wWeight*\wRect)}
+
+\begin{center}
+  \centering
+    \begin{tabular}{| P{3.0cm} | P{3.0cm}|}
+    \hline
+     \textbf{feature\_num} & \featureNum{}  \\ \hline
+     \textbf{rect\_num} & \rectNum{}  \\ \hline
+     \textbf{w\_weight} & \wWeight{} bits  \\ \hline
+     \textbf{w\_rect} & \wRect{} bits  \\ \hline
+      \cellcolor{green!35} \textbf{TOTAL} & \cellcolor{green!35} \result{} bits \\ \hline
+    \end{tabular}
+    \captionof{table}{Veličina memorije features\_mem za model \ref{haarcascade_frontal_sec}} \label{feature_mem_size}
+\end{center}
 
 \subsection{Modul classifier}
 

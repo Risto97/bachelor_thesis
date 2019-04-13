@@ -1,6 +1,8 @@
 \pgfdeclarelayer{background}
+\pgfdeclarelayer{layer1}
+\pgfdeclarelayer{layer2}
 \pgfdeclarelayer{foreground}
-\pgfsetlayers{background,main,foreground}
+\pgfsetlayers{background, layer2, layer1 ,main,foreground}
 
 \tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
 \tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=3.0cm, minimum height=2.5cm]
@@ -17,27 +19,45 @@
   \node [coordinate, left =0 cm of rect_rom] (rect_rom_in){};
   \node [coordinate, left =1 cm of rect_rom_in ] (rect_rom_in_port){};
   \node [coordinate, right =0 cm of rect_rom] (rect_rom_out){};
+  \node[below] at (rect_rom.south) {\textbf{3x}};
 
   \node [block_l, below right = 0.5cm and 2.0cm of feature_counter] (weight_rom) {weight\_ROM};
   \node [coordinate, left =0 cm of weight_rom ] (weight_rom_in){};
   \node [coordinate, left =1 cm of weight_rom_in ] (weight_rom_in_port){};
   \node [coordinate, right =0 cm of weight_rom] (weight_rom_out){};
   \node [coordinate, right =8.5 cm of weight_rom_out] (weight_rom_out_port){};
+  \node[above, yshift=0.4cm] at (weight_rom.north) {\textbf{3x}};
 
   \node [block_l, minimum height = 2cm, fill=red!15, right = 2.5cm of rect_rom] (calc_coords) {calc\_coords};
   \node [coordinate, left =0 cm of calc_coords ] (calc_coords_in){};
   \node [coordinate, right =0 cm of calc_coords ] (calc_coords_out){};
   \node [coordinate, right =3 cm of calc_coords_out ] (calc_coords_out_port){};
+  \node[below] at (calc_coords.south) {\textbf{3x}};
 
   % arrows
   \path [line] (feature_counter_out) -- (feature_counter_out_port) -| (rect_rom_in_port) -- (rect_rom_in);
   \path [line] (feature_counter_out) -- (feature_counter_out_port) -| (weight_rom_in_port) -- (weight_rom_in);
 
-  \path [line] (rect_rom_out) node[transition, yshift=0.3cm, xshift=+1.2cm] {\small packed\_data} -- (calc_coords_in);
+  \path [line] (rect_rom_out) node[transition, yshift=0.3cm, xshift=+1.45cm] {\small packed\_data} -- (calc_coords_in);
   \path [line] (calc_coords_out) -- (calc_coords_out_port) node[transition, yshift=0.3cm, xshift=-1.2cm] {\textbf{rects\_addr}};
   \path [line] (weight_rom_out) -- (weight_rom_out_port) node[transition, yshift=0.3cm, xshift=-1.0cm] {\textbf{weights\_data}};
 
   % group
+
+ \begin{pgfonlayer}{layer1}
+
+   \node [block_l, below right = 0.5cm and 2.0cm of feature_counter, yshift=0.2cm, xshift=0.2cm] (weight_rom1) {weight\_ROM};
+   \node [block_l, minimum height = 2cm, fill=red!15, right = 2.5cm of rect_rom, yshift=0.2cm, xshift=0.2cm] (calc_coords1) {calc\_coords};
+   \node [block_l, above right = 0.5cm and 2.0cm of feature_counter, xshift=0.2cm ,yshift=0.2cm] (rect_rom1) {};
+ \end{pgfonlayer}
+
+ \begin{pgfonlayer}{layer2}
+
+   \node [block_l, below right = 0.5cm and 2.0cm of feature_counter, yshift=0.4cm, xshift=0.4cm] (weight_rom2) {weight\_ROM};
+   \node [block_l, minimum height = 2cm, fill=red!15, right = 2.5cm of rect_rom, yshift=0.4cm, xshift=0.4cm] (calc_coords2) {calc\_coords};
+   \node [block_l, above right = 0.5cm and 2.0cm of feature_counter, xshift=0.4cm ,yshift=0.4cm] (rect_rom2) {};
+ \end{pgfonlayer}
+
 
  \begin{pgfonlayer}{background}
   \node[inner sep=15pt, fill=yellow!25, rounded corners, inner ysep =30pt, draw, thick,fit=(feature_counter)(rect_rom) (weight_rom) (calc_coords) ] (frame_buffer) {};

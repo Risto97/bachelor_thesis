@@ -1,5 +1,6 @@
-\documentclass[12pt]{article}
+\documentclass[12pt, fleqn]{article}
 \usepackage[serbian]{babel}
+
 
 \usepackage{thesis}
 \newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
@@ -8,6 +9,11 @@
 \date{}
 
 \begin{document}
+%% listing and figure numbering per section %%
+\counterwithin{lstlisting}{section}
+\counterwithin{figure}{section}
+\counterwithin{equation}{section}
+\counterwithin{table}{section}
 
 \maketitle
 \thispagestyle{empty}

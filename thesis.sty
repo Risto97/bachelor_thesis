@@ -21,7 +21,6 @@
   \hrule\@width \textwidth
   \kern2.6\p@}
 
-\usepackage{amsmath}
 \newcommand*{\Scale}[2][4]{\scalebox{#1}{$#2$}}%
 
 \title{
@@ -29,6 +28,17 @@
 \textmd{\textbf{\thesisName}}\\
 \vspace{2in}
 }
+
+%% math %%%
+\usepackage[nomessages]{fp}
+\usepackage{amsmath}
+
+%%%% table %%%
+\usepackage[table]{colortbl}
+
+%%% figure counter settings %%%
+\usepackage{chngcntr}
+
 
 %% tikz block diagrams %%
 \usepackage{tikz}
