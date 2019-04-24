@@ -227,7 +227,7 @@ Gde su y i x koordinate iz sweeper-a a img\_width je parametar koji označava
 
 \newpage
 
-\subsection{Modul ii\_gen i sii\_gen}
+\subsection{Modul ii\_gen i sii\_gen} \label{ii_sii_gen_sec}
 
 \subsubsection{Odabir algoritma}\label{ii_alg_sel_sec}
 
@@ -414,7 +414,7 @@ Mogu se videti i operator kvadriranja, množenja zatim i oduzimanja kao u
 prethodnom primeru. \\
 Lookup tabela je implementirana kao ROM memorija, nazvana SQRT\_ROM sa 256 lokacija.
 
-\subsection{Modul features\_mem}
+\subsection{Modul features\_mem} \label{features_meme_sec}
 
 Svako obeležje u modelu se sastoji od najviše tri pravougaonika što je
 objašnjeno u sekciji \ref{haar_features_sec}. \\
@@ -538,14 +538,97 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
     \captionof{table}{Veličina memorije features\_mem za model \ref{haarcascade_frontal_sec}} \label{feature_mem_size}
 \end{center}
 
+\newpage
+
 \subsection{Modul classifier}
 
+Classifier modul obavlja klasifikaciju prozora, odnosno signalizira da li se na
+trenutnom prozoru nalazi traženi objekat.
+Zauzima najviše hardverskih resursa u sistemu i pored ii\_gen(\ref{ii_sii_gen_sec})
+modula najviše utiče na performanse sistema.
 
 \begin{figure}[H]
   \centering
   \scalebox{0.80}{
     \input{images/tikz/classifier.tex}
     }
-\caption{Blok dijagram ii\_gen modula}
-\label{ii_gen}
+\caption{Blok dijagram classifier modula.}
+\label{classifier_bd}
 \end{figure}
+
+\newpage
+
+Sledeći primeri u C-u približno opisuje algoritam rada klasifikatora.
+
+\begin{lstlisting}[language=C++,caption={Weighted\_sum u \textbf{C}-u},captionpos=b, label=weighted_sum_code]
+  int weights[RECT_NUM][FEATURE_NUM]; //feature weights
+  int rects[RECT_NUM][FEATURE_NUM][4];//unpacked rect_coords
+
+  long weighted_sum_i(int ii[FRAME_HEIGHT][FRAME_WIDTH],
+                      int f,      // feature_num
+                      int r){     // rect_num
+
+    long sum = ii[rects[r][f][0][1]][rects[r][f][0][0]] +
+               ii[rects[r][f][3][1]][rects[r][f][3][0]] -
+               ii[rects[r][f][2][1]][rects[r][f][2][0]] -
+               ii[rects[r][f][1][1]][rects[r][f][1][0]];
+    sum *= weights[r][f];
+
+    return sum;
+  }
+  long weighted_sum(int ii[FRAME_HEIGHT][FRAME_WIDTH],
+                    int feature_num){
+    long sum0 = weighted_sum_i(ii, feature_num, 0);
+    long sum1 = weighted_sum_i(ii, feature_num, 1);
+    long sum2 = weighted_sum_i(ii, feature_num, 2);
+
+    return sum0 + sum1 + sum2;
+  }
+\end{lstlisting}
+
+Primer \ref{weighted_sum_code} približno prikazuje algoritam rada weighted\_sum
+komponente sa slike(\ref{classifier_bd}).
+Memorije weights i rects se nalaze u features\_mem komponenti u hardveskoj
+implementaciji i objašnjene su u sekciji(\ref{features_meme_sec}).\\
+
+Funkcija weighted\_sum\_i() računa sumu piksela pravougaonika na integralnoj slici.
+Kao na slici(\ref{IntegralImage_img2}) na integralnoj slici potrebno je sabrati
+gornji levi i donji desni piksel zatim oduzeti gornji desni i donji levi
+piksel.\\
+Pošto svaki pravougaonik ulazi u konačan zbir sa nekom težinom potrebno je
+pomnožiti sumu pravougaonika sa težinom kao u liniji 12. \\
+
+Funkcija weighted\_sum() dodatno sabira težinske sume sva tri pravougaonika.
+
+\newpage
+
+\begin{lstlisting}[language=C++,caption={Leaf\_val u \textbf{C}-u},captionpos=b, label=leaf_val_code]
+  int feature_thresholds[FEATURE_NUM];
+  int leaf_val0[FEATURE_NUM];
+  int leaf_val1[FEATURE_NUM];
+
+  int leaf_val(long stddev,
+               long sum,
+               int feature_num){
+
+    if(sum <= feature_thresholds[feature_num] * stddev)
+        return leaf_val0[feature_num];
+    else
+        return leaf_val1[feature_num];
+  }
+\end{lstlisting}
+
+Primer(\ref{leaf_val_code}) prikazuje algoritam računanja leaf\_val vrednosti. \\
+Memorija feature\_thresholds se nalazi na slici(\ref{classifier_bd}) pod nazivom
+feature\_thr ROM. \\
+Memorije leaf\_val0 i leaf\_val1 su leafVal0 i leafVal1 na
+slici(\ref{classifier_bd}). \\
+
+Funkcija leaf\_val kao ulaz prima standardnu devijaciju prozora, težinsku sumu
+sva tri pravougaonika i broj trenutnog obeležja. \\
+Povratna vrednost ove funkcije je sadržaj jedne od memorija leaf\_val0 ili
+leaf\_val1 za to obeležje. \\
+
+Ukoliko je težinska suma manja od praga obeležja feature\_threshold
+pomnoženog sa standardnom devijacijom, povratna vrednost će biti iz memeorije
+leaf\_val0, u suprotnom povratna vrednost će biti iz memorije leaf\_val1.

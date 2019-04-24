@@ -54,7 +54,7 @@ minimum height=1cm]
   \node [coordinate, below=0cm of sum0] (sum0_in2){};
   \node [coordinate, right=0cm of sum0] (sum0_out){};
 
-  \node [operator, right=1.0cm of sum0] (leaf_lt) {\large \textbf{$<$}};
+  \node [operator, right=1.75cm of sum0] (leaf_lt) {\large \textbf{$<$}};
   \node [coordinate, left=0cm of leaf_lt] (leaf_lt_in0){};
   \node [coordinate, below=0cm of leaf_lt] (leaf_lt_in1){};
   \node [coordinate, right=0cm of leaf_lt] (leaf_lt_out){};
@@ -64,7 +64,7 @@ minimum height=1cm]
   \node [coordinate, below=0cm of mult0] (mult0_in1){};
   \node [coordinate, above=0cm of mult0] (mult0_out){};
 
-  \node [coordinate, left=9.75cm of mult0_in0] (stddev){};
+  \node [coordinate, left=10.50cm of mult0_in0] (stddev){};
 
   \node [block_m, below right=2cm and -0.5cm of w_sum2] (feat_thr) {feature\_thr ROM};
   \node [coordinate, left=0cm of feat_thr] (feat_thr_addr){};
@@ -80,7 +80,7 @@ minimum height=1cm]
   \node [block_s, minimum width =2.5cm, left=1cm of stage_thr] (stage_cnt) {stage\_cnt};
   \node [coordinate, right=0cm of stage_cnt] (stage_addr){};
 
-  \node [multiplexer, right=2.5cm of leaf_lt] (mux0) {};
+  \node [multiplexer, right=1.5cm of leaf_lt] (mux0) {};
   \node [coordinate, left=0cm of mux0] (mux0_sel){};
   \node [coordinate, above left=0cm and 0cm of mux0] (mux0_in0){};
   \node [coordinate, above right=0cm and 0cm of mux0] (mux0_in1){};
@@ -127,15 +127,15 @@ minimum height=1cm]
   \path [line] (feat_thr_out) -| (mult0_in1);
   \path [line] (stddev) node[transition, yshift=+0.3cm, xshift=0.6cm] {\textbf{stddev}} -- (mult0_in0);
 
-  \path [line] (sum0_out) -- (leaf_lt_in0);
-  \path [line] (mult0_out) -- (leaf_lt_in1);
+  \path [line] (sum0_out) -- (leaf_lt_in0) node[transition, yshift=+0.8cm, xshift=-0.3cm] {rect\_sum};
+  \path [line] (mult0_out) node[transition, yshift=+1.0cm, xshift=-0.8cm] {feat\_thr} -- (leaf_lt_in1);
 
-  \path [line] (leaf_lt_out) -- (mux0_sel);
+  \path [line] (leaf_lt_out) -- (mux0_sel) node[transition, yshift=-0.5cm, xshift=-0.7cm] {leaf\_num};
 
   \path [line] (leaf0_out) -- (leaf0_port) -| (mux0_in0);
   \path [line] (leaf1_out) -- (leaf1_port) -| (mux0_in1);
 
-  \path [line] (mux0_out) -- (accum_stage_in);
+  \path [line] (mux0_out) node[transition, yshift=-1.0cm, xshift=+0.8cm] {leaf\_val} -- (accum_stage_in);
 
   \path [line] (accum_stage_out) -- (stage_lt_in0);
   \path [line] (stage_addr) -- (stage_thr_addr);
