@@ -1,0 +1,26 @@
+\\
+\begin{tikztimingtable}[%
+    timing/dslope=0.1,
+    timing/.style={x=5ex,y=2ex},
+    x=5ex,
+    timing/rowdist=4ex,
+    timing/name/.style={font=\sffamily\scriptsize}
+]
+\busref{CLK}         & 22{c} \\
+\busref{Data}[5:0]      & 2u 1D{0x05} 1D{0x01} 1D{0x19} 1D{0x03} 1D{0x07}
+1D{0x1B} 1D{0x00} 1D{0x04} 1D{0x1F} U \\
+\busref{Data[3:0]} & 2u 1D{5} 1D{1} 1D{9} 1D{3} 1D{7} 1D{11} 1D{0} 1D{4} 1D{15}  U \\
+\busref{EOT[1]\textsubscript{(Data[5])}} & U 6L 3H U \\
+\busref{EOT[0]\textsubscript{(Data[4])}} & U 2L 1H 2L 1H 2L 1H U \\
+\busref{Valid}   & 1L 9H L \\
+\busref{Ready} & 9L 1H L  \\
+\busref{Event}     & 9U 1D{ACK} U \\
+\extracode
+\begin{pgfonlayer}{background}
+\begin{scope}[semitransparent ,semithick]
+\vertlines[darkgray,dotted]{0.5,1.5 ,...,11.0}
+\foreach \i [count=\col from 0] in {0.5,1.5,...,11.0}
+    \node[font=\scriptsize] at (\i,3) {${\col}$};
+\end{scope}
+\end{pgfonlayer}
+\end{tikztimingtable}

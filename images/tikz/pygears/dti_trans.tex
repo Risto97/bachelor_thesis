@@ -1,0 +1,22 @@
+\\
+\begin{tikztimingtable}[%
+    timing/dslope=0.1,
+    timing/.style={x=5ex,y=2ex},
+    x=5ex,
+    timing/rowdist=4ex,
+    timing/name/.style={font=\sffamily\scriptsize}
+]
+\busref{CLK}         & 18{c} \\
+\busref{Data}      & 2u 3D 2U 1D 0L 1D 1U \\
+\busref{Valid}   & 1L 3H 2L 2H L \\
+\busref{Ready} & 3L 5H L  \\
+\busref{Event}     & 3U 1D{ACK} 2U 1D{ACK} 1D{ACK} U\\
+\extracode
+\begin{pgfonlayer}{background}
+\begin{scope}[semitransparent ,semithick]
+\vertlines[darkgray,dotted]{0.5,1.5 ,...,8.0}
+\foreach \i [count=\col from 0] in {0.5,1.5,...,8.0}
+    \node[font=\scriptsize] at (\i,3) {${\col}$};
+\end{scope}
+\end{pgfonlayer}
+\end{tikztimingtable}

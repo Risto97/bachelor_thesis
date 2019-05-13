@@ -1,0 +1,21 @@
+\\
+\begin{tikztimingtable}[%
+    timing/dslope=0.1,
+    timing/.style={x=5ex,y=2ex},
+    x=5ex,
+    timing/rowdist=4ex,
+    timing/name/.style={font=\sffamily\scriptsize}
+]
+\busref{CLK}         & 6{c} \\
+\busref{Valid}   & 1L 1H L \\
+\busref{Ready} & 1L 1H L  \\
+\busref{Event}     & 1U 1D{ACK} U \\
+\extracode
+\begin{pgfonlayer}{background}
+\begin{scope}[semitransparent ,semithick]
+\vertlines[darkgray,dotted]{0.5,1.5 ,...,3.0}
+\foreach \i [count=\col from 0] in {0.5,1.5,...,3.0}
+    \node[font=\scriptsize] at (\i,3) {${\col}$};
+\end{scope}
+\end{pgfonlayer}
+\end{tikztimingtable}

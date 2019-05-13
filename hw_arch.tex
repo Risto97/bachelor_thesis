@@ -632,3 +632,16 @@ leaf\_val1 za to obeležje. \\
 Ukoliko je težinska suma manja od praga obeležja feature\_threshold
 pomnoženog sa standardnom devijacijom, povratna vrednost će biti iz memeorije
 leaf\_val0, u suprotnom povratna vrednost će biti iz memorije leaf\_val1.
+
+\subsection{Interfejsi}
+
+Komunikacija svih unutrašnjih modula i komunikacija IP jezgra sa okolinom
+realizovana je pomoću \textbf{DTI}(data transfer interface)\cite{PyGears_OSDA} interfejsa. \\
+Korišćenjenjem ovog interfejsa dobijena je robusnija komunikacija između
+modula zahvaljujući \emph{handshaking}-u. \\
+
+Dodatna prednost ovog interfejsa je kompatibilnost sa \textbf{AXI-Stream}\cite{AXI_INTF}, \textbf{Avalon-ST}\cite{AVALON_INTF}
+i sličnim streaming interfejsima. Zahvaljujući tome moguće je povezati ovaj
+interfejs sa AXI-Stream i Avalon-ST bez dodatnog adaptera. \\
+
+Interfejs će biti detaljnije objašnjen u PyGears(\ref{pygears_sec}) sekciji.
