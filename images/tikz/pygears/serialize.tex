@@ -1,0 +1,27 @@
+\\
+\begin{tikztimingtable}[%
+    timing/dslope=0.1,
+    timing/.style={x=5ex,y=2ex},
+    x=5ex,
+    timing/rowdist=3ex,
+    timing/name/.style={font=\sffamily\scriptsize}
+]
+\busref{CLK}         & 10{c} \\
+\busref{din}      & 1U 3D{0x973} U \\
+\busref{din[2]}      & 1U 3D{0x9} U \\
+\busref{din[1]}      & 1U 3D{0x7} U \\
+\busref{din[0]}      & 1U 3D{0x3} U \\
+\busref{din\_valid}   & 1L 3H L \\
+\busref{din\_ready} & 3L 1H L  \\
+\busref{dout}      & 1U 1D{0x3} 1D{0x7} 1D{0x9} U \\
+\busref{dout\_valid}   & 1L 3H L \\
+\busref{dout\_ready} & 1L 3H L  \\
+\extracode
+\begin{pgfonlayer}{background}
+\begin{scope}[semitransparent ,semithick]
+\vertlines[darkgray,dotted]{0.5,1.5 ,...,4.0}
+\foreach \i [count=\col from 0] in {0.5,1.5,...,4.0}
+    \node[font=\scriptsize] at (\i,3) {${\col}$};
+\end{scope}
+\end{pgfonlayer}
+\end{tikztimingtable}

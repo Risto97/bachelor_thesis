@@ -1,0 +1,50 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=purple!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.0cm, text width=2.0cm, minimum height=2.0cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzset{
+  multiplexer/.style={
+    draw,
+    trapezium,
+    fill=blue!15,
+    shape border uses incircle,
+    shape border rotate=180,
+    minimum size=25pt
+  }
+}
+
+\begin{tikzpicture}[thick]
+
+  \node [block_s] (dut) {DUT};
+
+  \begin{pgfonlayer}{background2}
+    \node[inner sep=30pt, fill=black!25, rounded corners, draw, thick,fit=(dut)] (verilator) {};
+    \node[above] at (verilator.south) {Verilator};
+  \end{pgfonlayer}
+
+  \node [block_s, above left = 1.5cm and -1cm of verilator] (driver) {driver};
+
+  \node [block_s, above right = 1.5cm and -1cm of verilator] (monitor) {monitor};
+  \node [block_s, right = .5cm of monitor] (ref_model) {ref\_model};
+
+  \begin{pgfonlayer}{background2}
+    \node[inner sep=30pt, fill=green!25, rounded corners, draw, thick,fit=(driver) (monitor) (ref_model)] (python_env) {};
+    \node[below] at (python_env.north) {Python environment};
+  \end{pgfonlayer}
+
+  \begin{pgfonlayer}{background1}
+    \node[inner sep=30pt, fill=yellow!25, rounded corners, draw, thick,fit=(verilator) (python_env)] (verif_env) {};
+    \node[below] at (verif_env.north) {Verification environment};
+  \end{pgfonlayer}
+
+  % paths
+  % \path [line, very thick] (w_sum_in) node[transition, yshift=+0.3cm, xshift=0.6cm] {\textbf{weight\_data}}  node[transition, yshift=-0.3cm, xshift=-0.0cm] {\textbf{fb\_ii}}  -- (w_sum1_in_port);
+
+\end{tikzpicture}

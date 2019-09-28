@@ -274,5 +274,56 @@ potrebnih funkcionalnosti moguće je ostvariti njihovom kompozicijom. \\
 
 \subsubsection{Gear implementiram Python to HDL kompajlerom}
 
-Kako PyGears dolazi sa bibliotekom osnovnih funkcionalnih modula, većina
-potrebnih funkcionalnosti moguće je ostvariti njihovom kompozicijom. \\
+Moguće je i pisati opis gear-a u Python-u pomoću HDL kompajlera. \\
+
+Kao primer prikazan je serialize gear koji kao ulaz prima niz podataka, a na
+izlazu daje jedan po jedan podatak ulaznog niza, odnosno serializuje podatke.
+
+\lstinputlisting[language=Python, mathescape, caption={Primer kompajliranog
+  serialize gear-a}, captionpos=b, label=serialize_example]{serialize.py}
+
+Kao primer možemo uzeti niz \textbf{Array[Uint[4], 3](3, 7, 9)} za očekivati je da će se
+na izlazu pojaviti podaci redom 3, 7 pa 9 što je prikazano na primeru \ref{serialize_example2}.
+\begin{figure}[H]
+\centering{
+  \scalebox{1.2}{
+    \input{images/tikz/pygears/serialize.tex}
+  }}
+\caption{Serialize gear primer}
+\label{serialize_example2}
+\end{figure}
+
+\subsection{Python kao jezik za verifikaciju}
+
+Pored alata za pisanje opisa hardvera PyGears pruža mogućnost verifikacije i
+simulacije. \\
+Pomoću interfejsa sa besplatnim Verilator simulatorom i SystemVerilog DPI\cite{SV_DPI} interfejsom za
+komercijalne simulatore(Questa\cite{Questa}, NCSim\cite{NCSim}), moguće je
+pisanje verifikacionog okruženja u Python-u koje komunicira sa ovim
+simulatorima. \\
+
+Ovakvo verifikaciono okruženje ima prednosti u odnosu na SystemVerilog ili
+VHDL okruženje:
+\begin{itemize}
+
+\item Python je danas široko rasprostranjen i zajednica ima daleko više
+  korisnika nego SystemVerilog ili VHDL. Kao posledica toga dostupno je mnoštvo
+  paketa sa implementiranim algoritmima za većinu problema, tako da je pisanje
+  referentnih modela značajno olakšano korišćenjem gotovih biblioteka.
+
+\item Manipulacija kompleksnih tipova podataka je daleko lakša u Python-u od
+  VHDL-a i SystemVerilog-a, tako da je razvoj okruženja daleko brži.
+
+\item Verifikaciono okruženje se ne simulira zajedno sa HDL modelom time se
+  dobijaju bolje performanse verifikacije.
+
+\end{itemize}
+
+\begin{figure}[H]
+\centering{
+  \scalebox{1.0}{
+    \input{images/tikz/pygears/python_verilator.tex}
+  }}
+\caption{Python verifikaciono okruženje sa Verilatorom}
+\label{python_verif1}
+\end{figure}

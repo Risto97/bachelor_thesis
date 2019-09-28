@@ -2,11 +2,11 @@
 
 \section{Uvod} \label{viola_jones_introduction}
 
-Namena algoritma je detekcija i lokalizacija objekata na slici. Osmišljen od
+Viola-Jones algoritam za detekciju i lokalizaciju objekata na slici osmišljen od
 strane Paul Viola i Michael Jones 2001. godine \cite{Viola2001RapidOD}.
 
 Dugo godina je zbog brze i pouzdane detekcije bio standardan način detekcije
-lica na slici. I danas je prisutan u velikom broju mobilnih telefona i
+lica na slici. Danas je prisutan u velikom broju mobilnih telefona i
 digitalnih kamera, ali danas postaje polako zamenjen konvolucionim neuronskim
 mrežama. \\
 
@@ -24,9 +24,9 @@ Pouzdanost i brzina su postignuti uvođenjem tri ključna doprinosa:
 \subsection{Integralna slika} \label{ii_sec}
 
 Kao jedan od ključnih delova algoritma, integralna slika omogućava izračunavanje
-površine svakog pravouganog obeležja u konstantnom vremenu.
+zbira piksela svakog pravouganog obeležja u konstantnom vremenu.
 
-Intenzitet piksela u integralnoj slici na poziciji x,y je zbir svih piksela koji
+Vrednost piksela u integralnoj slici na poziciji x,y je zbir svih piksela koji
 se nalaze gore i levo od pozicije x,y.
 
 \begin{equation}
@@ -45,7 +45,7 @@ Gde je ii(x,y) integralna slika, a i(x,y) originalna slika. \\
 
 Piksele integralne slike je moguće računati u paraleli, ili
 sekvencijalno. Izbor algoritma za računanje integralne slike značajno utiče na
-performanse i potrebne hardverske resurse. \\
+performanse i potrebne hardverske resurse konačne implementacije. \\
 U paralelnoj implementaciji cena je
 više pristupa memoriji i više potrebnih sabirača, dok je kod sekvencijalne
 implementacije manja brzina proračunavanja. \\
