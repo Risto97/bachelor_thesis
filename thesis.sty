@@ -8,6 +8,8 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \usepackage{array}
 \usepackage{url}
 \usepackage{hyperref}
@@ -23,10 +25,32 @@
 
 \newcommand*{\Scale}[2][4]{\scalebox{#1}{$#2$}}%
 
-\title{
-\vspace{1in}
-\textmd{\textbf{\thesisName}}\\
-\vspace{2in}
+%%%%% Title %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+
+\newcommand{\titlePageCmd}{
+  \begin{titlepage}
+    \null
+    \vskip 2.5cm
+
+    \begin{center}
+
+      {\Huge \textbf \thesisName}
+      \vskip 0.5cm
+
+      {\Large \subjectName}
+
+    \end{center}
+
+    \vfill
+    \vfill
+
+    \begin{tabularx}{\textwidth}{X r}
+      \large Kandidat & \large Mentor \\
+      \large \@author & \large \mentor \\
+    \end{tabularx}
+
+    \center  \small\today\\
+  \end{titlepage}
 }
 
 %% math %%%

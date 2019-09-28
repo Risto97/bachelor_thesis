@@ -2,11 +2,24 @@
 \usepackage[serbian]{babel}
 
 
-\usepackage{thesis}
-\newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
+% \usepackage{thesis}
+% \newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
 
 \author{Risto Pejašinović}
 \date{}
+
+\usepackage{glossaries}
+\usepackage{thesis}
+\usepackage{glossary}
+\usepackage{amsmath}
+\usepackage{bytefield}
+\usepackage{register}
+\newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
+% \newcommand{\subjectName}{Projekat iz predmeta Projektovanje elektronskih uređaja na sistemskom nivou}
+
+\author{Risto Pejašinović EE19/2015}
+\newcommand{\mentor}{}
+\date{septembar 2019}
 
 
 \begin{document}
@@ -16,11 +29,15 @@
 \counterwithin{equation}{section}
 \counterwithin{table}{section}
 
-\maketitle
+\titlePageCmd
+\noindent
+
 \thispagestyle{empty}
 \newpage
 
 \tableofcontents
+\newpage
+\input{glossary.tex}
 \newpage
 
 \input{viola_jones.tex}
