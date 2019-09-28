@@ -1,31 +1,43 @@
 \section{Specifikacije za izršavanje}
 
-Kako bi se hardver efikasno projektovao i particionisao potrebno je početi od
-softverske implementacije na višem nivou apstrakcije.  \\
-Jezici visokog nivoa kao što je Python su veoma dobri za ovu namenu.
+Prilikom projektovanja hardverske arhitekture određenog algoritma preporučljivo
+je prvo implementirati algoritam u softveru kako bi se algoritam bolje shvatio. \\
+Postoje metodologije koje definišu potrebne korake prilikom projektovanja
+digitalnih sistema, jedna takva metodologija je \gls{esl}.
+U ovom radu nije korišćena ova metodologija već je softverska
+specifikacija napisana u C++ i Python jeziku. \\
+Iz ovih specifikacija dobijeno je bolje razumevanje algoritma i naznake o
+mogućnosti paralelizna određenih delova algoritma i particionisanja komponenti
+sistema. \\
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=0.9\textwidth]{bdp/sw_arch/sw_arch1.png}
+  \includegraphics[width=0.9\linewidth]{bdp/sw_arch/sw_arch1.png}
   \caption{Veza Python modela sa XML modelom i C specifikacijom}
   \label{sw_arch_spec1}
 \end{figure}
 
-Na slici(\ref{sw_arch_spec1}) prikazana je struktura koda u slučaju Python i C
+Na slici(\ref{sw_arch_spec1}) prikazana je struktura modela u slučaju Python i C
 klasifikatora. \\
 
 \noindent
-Na ulazu se nalazi XML model dobijen treningom pomoću OpenCV opisan u sekciji
+Na ulazu se nalazi \gls{xml} model dobijen treniranjem pomoću OpenCV biblioteke opisan u sekciji
 \ref{opencv_model}. \\
-Kao jezik za parsiranje XML fajla se koristi Python.
+Parsiranje XML modela se rešava u Python-u.
 Zbog velikog broja Python paketa dostupnih sa gotovim rešenjima za većinu softverskih problema, problem
 parsiranja XML fajla se može rešiti korišćenjem paketa xmltodict\footnote{\url{https://pypi.org/project/xmltodict/}}. \\
 \emph{Xmltodict} parsira XML fajl i skladišti ga u Python dictionary. \\
-Klase \emph{CascadeClass}, \emph{StageClass}, \emph{FeatureClass} i
-\emph{RectClass}  \footnote{\texttt{\detokenize{cascade_classifier/python_model/cascade.py}}} napisane u Pythonu
-predstavljaju Python model kaskadnog klasifikatora. \\
+Implementirane su klase \emph{CascadeClass}, \emph{StageClass}, \emph{FeatureClass} i
+\emph{RectClass}
+\footnote{\texttt{\detokenize{cascade_classifier/python_model/cascade.py}}} koje
+predstavljaju abstraktni Python model modela kaskadnog klasifikatora. \\
 
-Napisan je i Python specifikacija za isvršavanje koja direktno koristi Python
-klase za detekciju objekata. \\
-Veza između Python modela i C specifikacije realizovana je preko \emph{C Header}
-fajla koji je generisan pomoću Python-a.
+Napisana je i Python implementacija Viola-Jones algoritma koja koristi Python
+model klasifikatora i koristi se kao specifikacija za izvršavanje. \\
+
+Python model klasifikatora može da generiše \emph{C++} reprezentaciju modela
+klasifikatora i sačuva ih u Header fajlove. \\
+Ovim je izbegnuto parsiranje XML fajlova C++ jezikom, pošto je ovaj zadatak
+mnogo jednostavnije odraditi u Python-u. \\
+C++ implementacija Viola-Jones algoritma koristi ovako generisan model
+klasifikatora.

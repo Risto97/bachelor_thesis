@@ -1,13 +1,15 @@
 \section{OpenCV modeli} \label{opencv_model}
 
-OpenCV sadrži alat za treniranje kaskada i detekciju objekata pomoću
-Viola-Jones algoritma.
-Takođe dolazi sa istreniranim i testiranim
-klasifikatorima\footnote{\url{https://github.com/opencv/opencv/tree/master/data/haarcascades}}
+OpenCV je biblioteka koja sadrži implementacije velikog broja algoritama za
+obradu slike.
+OpenCV sadrži alat za AdaBoost treniranje kaskadnog klasifikatora kao i implementaciju
+detektora objekata pomoću Viola-Jones algoritma. \\
+Pored toga OpenCV sadrži istrenirane i testirane modele klasifikatora\footnote{\url{https://github.com/opencv/opencv/tree/master/data/haarcascades}}.
 \cite{OpenCV_docs} \\
 
 \noindent
-Rezultat treniranja se smešta u .xml fajl koji sadrži sledeće informacije:
+OpenCV istrenirane modele skladišti u .xml fajlove koji sadrže sledeće
+informacije o modelu:
 
 \begin{itemize}
 	\item Dimenzija obeležja (\emph{height, width})
@@ -25,11 +27,11 @@ Rezultat treniranja se smešta u .xml fajl koji sadrži sledeće informacije:
     \end{itemize}
 	\item Informacije o obeležjima (\emph{features})
     \begin{itemize}
-    \item Koordinate i težine tačaka pravougaonika (\emph{rects}) \\
-      Svako obeležje može imati 2 ili 3 pravougaonika \\
-      Gde su prve 2 vrednosti x i y koordinate gornje leve tačke, \\
-      Treća i četvrta vrednost širina i visina pravougaonika  \\
-      Poslednja vrednost težina pravougaonika
+    \item Koordinate i težine tačaka pravougaonika (\emph{rects}). \\
+      Svako obeležje može imati 2 ili 3 pravougaonika. \\
+      Prve 2 vrednosti liste rects su x i y koordinate gornje leve tačke, \\
+      treća i četvrta vrednost širina i visina pravougaonika,  \\
+      poslednja vrednost je težina pravougaonika.
     \end{itemize}
 \end{itemize}
 

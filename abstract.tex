@@ -1,18 +1,20 @@
 \section{Sažetak}
 
-Ovaj projekat sadrži:
+Cilj ovog rada je hardverska implementacija akceleratora Viola-Jones algoritma. \\
+Pored toga hardverska implementacija je urađena pomoću dve metodologije kako bi
+se utvrdile prednosti i mane ovih metodologija. \\
+
+\noindent
+Kako bi se projektovao željeni hardverski akcelerator bilo je potrebno odraditi
+sledeće stvari: \\
 \begin{itemize}
-  \item Pisanje specifikacije u Python i C programskom jeziku za izvršavanje i
-    pomoć pri particionisanju i projektovanju hardvera.
-  \item Projektovanje arhitekture hardverskog akceleratora za Viola-Jones algoritam opisam u delu \ref{viola_jones_algorithm}.
+  \item Pisanje implementacija u Python i C++ programskim jezicima kao
+    specifikacija za izvršavanje, koja pritom pomaže prilikom particionisanja i projektovanja hardvera.
+  \item Projektovanje arhitekture hardverskog akceleratora za Viola-Jones algoritam.
   \item Pisanje HDL modela za sintezu u SystemVerilog RTL metodologiji i
     \PyGears{} metodologiji.
-  \item Pisanje verifikacionog okruženja u SystemVerilog \UVM{} i Python PyGears
-    okruženju.
-  \item Poređenje dve metodologije i analiza prednosti i mane obe metodologije.
-  \item Poređenje komercijalnog \QuestaSim{} simulatora i besplatnog open-source
-    \Verilator{} simulatora.
-  \item Implementacija projektovanog IP jezgra na \ZTurn{} sa Zynq
+  \item Poređenje dve metodologije i analiza prednosti i mana obe metodologije.
+  \item Implementacija projektovanog IP jezgra na \ZTurn{} ploči sa Zynq
     7020 SoC.
   \item Pisanje Linux Kernel drajvera i korisničke aplikacije za korišćenje
     jezgra za detekciju lica na Xilinx Zynq platformi.
