@@ -1,0 +1,42 @@
+\section{Integracija IP jezgra sa Zynq sistemom}
+
+PyGears i SystemVerilog implementacije predložene arhitekture su kompatibilne u
+pogledu spoljnih interfejsa.
+Pored toga ove implementacije su uveliko nezavisne od ciljane tehnologije za
+implementaciju. \\
+U ovom radu IP jezgro će biti implementirano na Zynq \gls{soc} sistemu. \\
+
+Korišćeni DTI interfejs je kompatibilan sa AXI-Stream intefejsom, tako da je
+integracija sa sistemima koji koriste druge interfejse poput Avalon-a trebala
+biti jednostavna uz adaptere. \\
+
+Preporučena je integracija IP jezgra u sistem sa procesorom, što će biti i
+prikazano u ovom radu.
+U ovom slučaju biće korišćen ARM Cortex-A9 procesor koji se može naći kao Hard
+IP jezgro unutar Zynq SoC platforme kompanije Xilinx. \\
+
+\subsection{Zynq}
+
+Zynq se sastoji od \gls{ps} sistem i \gls{pl} sistema.
+PS sistem je sačinjen od već pomenutog ARM Cortex-A9 \gls{APU} procesora.
+Dok PL sistem predstavlja \gls{fpga} programabilnu logiku Artix-7 familije. \\
+
+Komunikacija između PL i PS sistema se obavlja preko \gls{axi} interfejsa,
+interapt pinova ili \gls{emio} pinova.\\
+
+ARM procesor ima mogućnost povezivanja eksterne \gls{ddr} memorije preko
+internog DDR kontrolera.
+Preko ovog kontrolera pristup memoriji ima i PL sistem. \\
+Zynq SoC ima podršku GNU/Linux operativnog sistema.
+
+\subsection{Predloženi blok dijagram sistema}
+
+
+\begin{figure}[H]
+  \centering
+  \resizebox{1\textwidth}{!}{%
+    \input{images/tikz/system.tex}
+  }
+  \caption{Blok dijagram stddev modula.}
+  \label{stddev_bd}
+\end{figure}

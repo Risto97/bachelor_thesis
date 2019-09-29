@@ -1,0 +1,81 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.0cm, minimum height=1.0cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, line width = 0.05cm, arrows={-Triangle[length=0.2cm]}]
+
+\tikzstyle{dreg} = [draw, text centered, fill=blue!15, minimum width = 1.5cm,
+minimum height=1.5cm]
+
+\tikzstyle{square} = [draw, thick, fill=blue!15, circle, minimum size = 1cm, node distance = 2cm]
+\tikzstyle{mult} = [draw, thick, fill=blue!15, circle, minimum size = 1cm ,node distance = 2cm]
+\tikzstyle{sum} = [draw, thick, fill=blue!15, circle, minimum size= 1cm, node distance = 2cm]
+
+\begin{tikzpicture}[thick]
+
+  \node [block_l, fill=red!20] (csc_cls) {\textbf{\large cascade\_classifier}};
+  \node [coordinate, left = 0cm of csc_cls] (csc_cls_in){};
+  \node [coordinate, left = 2cm of csc_cls_in] (ii_in){};
+  \node [coordinate, above right = -0.5cm and 0cm of csc_cls] (csc_cls_out){};
+  \node [coordinate, below right = -0.5cm and 0cm of csc_cls] (csc_cls_irq){};
+  \node [coordinate, right = 1cm of csc_cls_irq] (csc_cls_irq1){};
+
+  \node [block_l, fill=red!20, below = 2cm of csc_cls] (dm_cmd) {\textbf{\large dm\_cmd}};
+  \node [coordinate, below left = 0 and -0.5cm of dm_cmd] (dm_cmd_in){};
+  \node [coordinate, below right = 0 and -0.5cm of dm_cmd] (dm_cmd_irq_out){};
+  \node [coordinate, above right = 0cm and -0.5cm of dm_cmd] (dm_cmd_irq_in){};
+  \node [coordinate, above = 1cm of dm_cmd_irq_in] (dm_cmd_irq_in1){};
+  \node [coordinate, left = 0cm of dm_cmd] (mm2s_cmd){};
+  \node [coordinate, right = 0cm of dm_cmd] (s2mm_cmd){};
+
+  \node [block_l, below = 2cm of dm_cmd] (apu) {\textbf{\large APU}};
+  \node [coordinate, above left = 0cm and -0.5cm of apu] (apu_cmd){};
+  \node [coordinate, above right = 0cm and -0.5cm of apu] (apu_irq){};
+  \node [coordinate, left = 0cm of apu] (apu_mm2s){};
+  \node [coordinate, right = 0cm of apu] (apu_s2mm){};
+
+  \node [block_l, right = 3cm of csc_cls] (s2mm) {\textbf{\large dm\_s2mm}};
+  \node [coordinate, right = 0cm of s2mm] (s2mm_out){};
+  \node [coordinate, right = 1cm of s2mm] (s2mm_out1){};
+  \node [coordinate, above left = -0.5cm and 0cm of s2mm] (s2mm_in){};
+  \node [coordinate, below left = -0.5cm and 0cm of s2mm] (s2mm_cfg){};
+  \node [coordinate, left = 1cm of s2mm_cfg] (s2mm_cfg1){};
+
+
+  \node [block_l, left = 2cm of csc_cls] (mm2s) {\textbf{\large dm\_mm2s}};
+  \node [coordinate, above left = -0.5cm and 0cm of mm2s] (mm2s_in){};
+  \node [coordinate, left = 2cm of mm2s_in] (mm2s_in1){};
+  \node [coordinate, below left = -0.5cm and 0cm of mm2s] (mm2s_cfg){};
+  \node [coordinate, left = 1cm of mm2s_cfg] (mm2s_cfg1){};
+  \node [coordinate, right = 0cm of mm2s] (mm2s_out){};
+
+  %% group %%
+ \begin{pgfonlayer}{background1}
+   \node[inner sep=20pt, fill=yellow!25, rounded corners, draw, thick,fit=(csc_cls) (s2mm_out1) (mm2s_in1) (dm_cmd) (mm2s) (s2mm) (apu)] (system) {};
+  \node[above left] at (system.south east) {\huge \textbf{SoC}};
+\end{pgfonlayer}
+
+
+  % arrows
+  \path [line] (csc_cls_out) node[transition, yshift=+0.3cm, xshift=+1.3cm] {detect\_addr}  -- (s2mm_in);
+  \path [line] (mm2s_out) -- (csc_cls_in) node[transition, yshift=+0.3cm, xshift=-0.8cm] {img\_in}  ;
+  \path[line] (csc_cls_irq) node[transition, yshift=+0.3cm, xshift=+0.6cm] {irq}  -- (csc_cls_irq1) |- (dm_cmd_irq_in1) -- (dm_cmd_irq_in);
+
+  \path [line] (s2mm_cmd) node[transition, yshift=+0.3cm, xshift=+1.0cm] {s2mm\_cfg} -| (s2mm_cfg1) -- (s2mm_cfg);
+  \path [line] (mm2s_cmd) node[transition, yshift=+0.3cm, xshift=-1.0cm] {mm2s\_cfg} -| (mm2s_cfg1) -- (mm2s_cfg);
+
+  \path[line] (s2mm_out) node[transition, yshift=+0.3cm, xshift=+0.8cm] {s2mm}  -- (s2mm_out1) |- (apu_s2mm);
+
+  \path[line] (apu_mm2s) node[transition, yshift=+0.3cm, xshift=-0.8cm] {mm2s} -| (mm2s_in1) -- (mm2s_in);
+
+  \path[line] (apu_cmd) node[transition, yshift=+0.5cm, xshift=-1.0cm] {apu\_cmd}  -- (dm_cmd_in);
+
+  \path[line] (dm_cmd_irq_out) node[transition, yshift=-0.5cm, xshift=+0.4cm] {irq}  -- (apu_irq);
+
+
+\end{tikzpicture}
