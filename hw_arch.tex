@@ -2,62 +2,71 @@
 
 \subsection{Uvod}\label{hw_arch_intro}
 
-U ovom poglavlju biće opisana arhitektura hardvera koja je projektovana. \\
-Postoje razlike između implementiranih arhitektura u SystemVerilog-u i PyGears-u. \\
-Pošto obe metodologije sa sobom nose neke karakteristike koje otežavaju ili
-olakšavaju određene principe prilikom projektovanja, ove razlike će biti opisane
-u kasnijim poglavljima. \\
+U ovom poglavlju biće opisana projektovana arhitektura hardvera. \\
+Predložena hardverska arhitektura će biti opisani uz što manje detalja
+implementacije.
+PyGears i SystemVerilog implementacije će pratiti predloženu arhitekturu, ali će
+se razilikovati u detaljima. \\
 
-Iako su razlike između ove dve implementacije male opis u ovom poglavlju će biti
-bliži implementaciji u PyGears-u koja je novija i ispravljene su neke sistemske
-greške. \\
-
-Arhitektura će biti opisana na nivou modula od kojih se sastoji njihovih
-portova, funkcija koje obavljaju i eventualno kritičnih funkcionalnih i memorijskih jedinica.
-
+Na slici(\ref{hw_arch_top}) prikazan je uprošćen blok dijagram realizovanog IP jezgra.
 \begin{figure}[H]
 \centering{
-  \scalebox{0.8}{
+    \resizebox{\textwidth}{!}{%
     \input{images/tikz/hw_arch.tex}
   }}
 \caption{Arhitektura hardvera kaskadnog klasifikatora}
 \label{hw_arch_top}
 \end{figure}
 
-Na slici(\ref{hw_arch_top}) prikazan je uprošćen blok dijagram realizovanog IP jezgra.
+U nastavku će biti opisana arhitektura.
+Prvo će biti opisani spoljni interfejsi, zatim će detaljnije biti opisane
+interne komponente. \\
 
 \subsection{Interfejsi IP jezgra}
-\emph{IP} jezgro se povezuje pomoću 3 interfejsa:
+\emph{IP} jezgro se povezuje ostatkom sistema pomoću 3 spoljna interfejsa:
 
 \begin{itemize}
-  \item Ulazni interfejs \textbf{img\_in} sastoji se od 8-bitnog podatka
+  \item Ulazni interfejs \textbf{img\_in} je 8-bitni podatak i predstavlja
     vrednosti piksela slike u \emph{grayscale} formatu (nijanse sive).
-  \item Izlazni interfejs \textbf{detect\_addr} ukoliko jezgro detektuje lice na slici
-    postaviće x i y koordinate na ovom interfejsu.
-  \item Izlazni interfejs \textbf{irq} je signal koji označava završetak obrade slike i
-    signalizira da je jezgro spremno za novu sliku.
+  \item Izlazni interfejs \textbf{detect\_addr} ukoliko jezgro detektuje objekat
+    na slici, na ovom interfejsu će se pojaviti X i Y koordinate
+    detektovanog objekta.
+  \item Izlazni interfejs ili signal \textbf{irq} signalizira završetak obrade slike i
+    daje do znanja ostatku sistema da je jezgro spremno za obradu nove slike.
     Namenjen da se koristi kao prekidni signal za procesor.
 \end{itemize}
 
 \subsection{Modul IMG RAM}
 
+U toku rada IP jezgra postoji potreba za ponovnim čitanjem istih piksela slike.
+Čitanje iz eksterne memorije može biti sporo i energetski neefikasno, kako bi se
+smanjila potreba za višestrukim čitanjem istog podatka iz spoljne memorije,
+odlučeno je da se cela slika se čuva u manju memoriju unutar IP jezgra. \\
+
 Modul \textbf{IMG RAM} je zadužen za skladištenje slike koja se obrađuje.
-Sastoji se od RAM memorije i brojača za generisanje adrese za upis. \\
-Nakon primljenog podatka na ulazu brojač adrese upisa se poveća za 1. \\
+Sastoji se od \gls{ram} memorije i brojača za generisanje adrese za upis. \\
+Korišćena RAM memorija treba da ima jedan port za upis i jedan za čitanje.\\
+
+Prilikom upisivanja slike u memoriju, posle svakog primljenog podatka na ulaznom
+interfejsu brojač adrese upisa se poveća za 1. \\
+
 Skladištena slika je u 8-bitnom formatu i predstavlja grayscale vrednost piksela
 originalne slike. \\
 Veličina memorije je $width*height*8$ bit. Za dimenziju slike 240x320
 veličina memorije je $614400$ bita. \\
 
-Komunicira sa okolinom pomoću 3 interfejsa:
+IMG RAM se povezuje sa ostatkom sistema preko 3 interfejsa:
 \begin{itemize}
   \item Ulazni interfejs \textbf{img\_in} ekvivalentan je sa istoimenim
     interfejsom na višem nivou hijerarhije.
-  \item Ulazni interfejs \textbf{rd\_addr} predstavlja linearnu adresu
-    generisanu od strane \textbf{rd\_addrgen} modula. Koristi se za čitanje
-    podataka iz RAM memorije.
-  \item Izlazni interfejs \textbf{img\_out} predstavlja iščitane podatke iz RAM memorije.
+  \item Ulazni interfejs \textbf{rd\_addr} prihvata linearizovanu adresu za
+    čitanje piksela slike iz ove memorije.
+    Ova adrese je generisana od strane \textbf{rd\_addrgen} modula.
+  \item Izlazni interfejs \textbf{img\_out} šalje pročitane vrednosti piksela iz
+    RAM memorije ostatku sistema.
 \end{itemize}
+
+\newpage
 
 \subsection{Modul rd\_addrgen}
 
@@ -71,32 +80,37 @@ Blok dijagram ovog modula prikazan je na slici (\ref{rd_addrgen_bd}). \\
 \label{rd_addrgen_bd}
 \end{figure}
 
-Pored generisanja adrese pomoću ovog modula je dodatno rešeno i skaliranje slike opisano u sekciji
-\ref{image_scaling}. \\
+U sklopu ovog modula rešeno je i skaliranje slike, opisano u sekciji \ref{image_scaling}.
 
 \subsubsection{Scale\_counter}\label{scale_counter_sec}
-\textbf{Scale\_counter} je brojač koji se poveća za jedan kada klasifikator
-završi obradu slike na trenutnom nivou piramide prikazanoj na slici
-(\ref{image_pyramid}) sekciji \ref{image_scaling}. \\
+\textbf{Scale\_counter} je brojač koji predstavlja trenutni nivo piramide
+skaliranja prikazane na slici(\ref{image_pyramid}).
+Nakom završetka obrade slike na trenutnom nivou piramide ovaj brojač se uveća za
+1. \\
 
 \subsubsection{Boundaries}\label{boundaries_sec}
-\textbf{Boundaries} kao ulaz dobija trenutni stepen skaliranja
-\textbf{scale\_num} i na osnovu njega na izlazu daje \textbf{X} i \textbf{Y} granice do kojih
-\textbf{hopper} treba da broji.
-Ove granice osiguravaju ispravno generisanje adrese, odnosno obezbeđuju da
-izlazna adresa nikad ne iskoči iz opsega \textbf{img\_ram} memorije. \\
-Realizovan je pomoću multipleksera i softverski izračunatih konstantnih
-vrednosti granica. \\
+Ulazni interfejs \textbf{Boundaries} modula je povezan sa izlazom
+\textbf{scale\_counter} modula, odnosno dobija trenutni stepen skaliranja slike kao ulaz.
+Na osnovu stepena skaliranje ovaj modul na izlazu daje granične vrednosti
+\textbf{X} i \textbf{Y} koordinata za \textbf{hopper} modul.\\
+Granice osiguravaju ispravno generisanje adrese, odnosno obezbeđuju da
+adresa za čitanje iz \textbf{IMG RAM} modula nikad ne iskoči iz opsega memorije. \\
+Ove vrednosti su fiksne i moguće ih je izračunati pre sinteze hardvera, pa su
+zato softverski izračunate i prosleđene kao parametri. \\
+Ovaj modul se sastoji od dva multipleksera i liste unapred poznatih konstanti. \\
 
 \subsubsection{Scale\_ratio}\label{scale_ratio_sec}
-\textbf{Scale\_ratio} ima ulogu da dostavi \textbf{sweeper}-u potrebne parametre za
-računanje skalirane adrese.
-Realizovan je isto kao i \textbf{boundaries} modul. \\
 
-\subsubsection{Hopper}\label{hopper_sec}
+\textbf{Scale\_ratio} je sličan \textbf{boundaries} modulu i prihvata isti
+ulazni podata. \\
+Razlika u odnosu na \textbf{boundaries} modul je u vrednosti parametara.
+Parametri u ovom modulu se prosleđuju \textbf{sweeper} modulu i omogućavaju
+računanje skalirane adrese pomoću aritmetike sa fiksnom tačkom. \\
+
+\subsubsection{Hopper i Sweeper}\label{hopper_sec}
 \textbf{Hopper} se može zamisliti kao dvostruka ugnježdena for petlja gde
 iteratori petlje predstavljaju koordinate \textbf{X} i \textbf{Y}. \\
-Prvo se iterira po \textbf{X} kordinati pa po \textbf{Y}.
+Prvo se iterira po \textbf{X} kordinati pa zatim po \textbf{Y}.
 
 \begin{lstlisting}[language=C++,caption={Primer \textbf{hopper}-a u \textbf{C}-u},captionpos=b, label=hopper_code]
   for(int y = 0; y < boundary_y[scale_num]; y++){
@@ -108,52 +122,18 @@ Prvo se iterira po \textbf{X} kordinati pa po \textbf{Y}.
 
 Na primeru (\ref{hopper_code}) prikazana je implementacija \textbf{hopper}-a u
 \textbf{C}-u.
-Može se videti da granice \textbf{hopper}-a zavise od promenljivih
-\textbf{boundary\_x} i \textbf{boundary\_y} koji se indeksiraju preko
-\textbf{scale\_num} promenljive opisane u sekcijama (\ref{boundaries_sec},
+Može se videti da gornje granice \textbf{hopper}-a predstavljaju konstante
+\textbf{boundary\_x[scale\_num]} i \textbf{boundary\_y[scale\_num]}, kao što je
+opisano u sekcijama (\ref{boundaries_sec},
 \ref{scale_counter_sec}). \\
 
-Na slikama (\ref{hop_sweep1}, \ref{hop_sweep2}) je prikazan rad hopper-a i
-sweeper-a.
-Plavi kružići predstavljaju piksele za koje će
-rd\_addrgen generisati adresu za trenutno stanje hopper-a. \\
-Gornji levi kružić je koordinata trenutnog položaja hopper-a.
-Crevnom strelicom je obeleženo iteriranje hopper-a kroz sliku. \\
-Na slici (\ref{hop_sweep2}) može se videti trenutak kada hopper dostiže granicu
-boundary\_x nakon čega prelazi u novi red, uvećava Y koordinatu a X koordinatu
-postavlja na početni položaj. \\
+Iteratori petlje se prosleđuju na izlazni interfejs \textbf{hopper}-a i služe
+kao početne tačke za brojače \textbf{sweeper}-a koji će biti opisan u nastavku. \\
 
-Nakon što hopper dostigne obe granice boundary\_x i boundary\_y završen je
-trenutni stepen skaliranja slike i potrebno je uvećati scale\_num za jedan.
-
-\begin{figure}[H]
-  \centering
-  \scalebox{0.82}{
-    \input{images/tikz/hop_sweep/hop_sweep1.tex}
-    \input{images/tikz/hop_sweep/hop_sweep2.tex}
-    }
-\caption{Način rada \textbf{hopper} i \textbf{sweeper} komponenti.}
-\label{hop_sweep1}
-\end{figure}
-
-
-\begin{figure}[H]
-  \centering
-  \scalebox{0.82}{
-    \input{images/tikz/hop_sweep/hop_sweep3.tex}
-    \input{images/tikz/hop_sweep/hop_sweep4.tex}
-    }
-\caption{Prelazak \textbf{hopper}-a u novi red.}
-\label{hop_sweep2}
-\end{figure}
-
-\newpage
-
-\subsubsection{Sweeper}\label{sweeper_sec}
 Slično kao hopper i sweeper se može predstaviti kao dve ugnježdene for petlje. \\
 Ponovo se prvo iterira po X koordinati pa onda po Y.
 
-\begin{lstlisting}[language=C++,caption={Primer \textbf{sweeper}-a u \textbf{C}-u},captionpos=b, label=sweeper_code]
+\begin{lstlisting}[language=C++,caption={Primer \textbf{hopper}-a i \textbf{sweeper}-a u \textbf{C}-u},captionpos=b, label=sweeper_code]
   int x, y;
   // hopper
   for(int hop_y = 0; hop_y < boundary_y[scale_num]; hop_y++){
@@ -169,63 +149,97 @@ Ponovo se prvo iterira po X koordinati pa onda po Y.
   }
 \end{lstlisting}
 
-Kao što se vidi na primeru (\ref{sweeper_code}) hopper i sweeper se zajedno mogu
+Kao što se vidi na primeru (\ref{sweeper_code}) \textbf{hopper} i \textbf{sweeper} se zajedno mogu
 predstaviti kao četiri ugnježdene for petlje. \\
-Sweeper će početnu vrednost svojih X i Y promenljivih uzeti od trenutne
-vrednosti hopper koordinata, zatim će se iterirati feature\_width i
-feature\_height puta. \\
-Na slikama (\ref{hop_sweep1}, \ref{hop_sweep2}) prelazak sweeper-a po slici je
-prikazan horizontalnim i dijagonalnim strelicama.
-Dok je plavim kružićima predstavljeni pikseli koje sweeper prebriše za jedan
-položaj hopper-a.
+\textbf{Sweeper} će kao donje granicu petlji uzeti trenutne vrednosti
+\textbf{hopper} koordinata, zatim će se iterirati \textbf{feature\_width} i \textbf{feature\_height} puta. \\
 
-\newpage
+
+Rad \textbf{hopper}-a i \textbf{sweeper}-a je nalakše opisati slikama, što je i
+učinjeno na slikama(\ref{hop_sweep1}, \ref{hop_sweep2}).
+Na slikama (\ref{hop_sweep1}, \ref{hop_sweep2}) prelazak \textbf{sweeper}-a po slici je
+prikazan horizontalnim i dijagonalnim strelicama.
+Plavim kružićima predstavljeni su pikseli koje sweeper prebriše za jedan
+položaj hopper-a.\\
+
+Gornji levi kružić predstavlja koordinatu trenutnog položaja hopper-a.
+Crevnom strelicom je obeleženo iteriranje hopper-a kroz sliku. \\
+
+\begin{figure}[H]
+  \centering
+    \resizebox{\textwidth}{!}{%
+    \input{images/tikz/hop_sweep/hop_sweep1.tex}
+    \input{images/tikz/hop_sweep/hop_sweep2.tex}
+    }
+\caption{Način rada \textbf{hopper} i \textbf{sweeper} komponenti.}
+\label{hop_sweep1}
+\end{figure}
+
+Na slici (\ref{hop_sweep2}) može se videti trenutak kada hopper dostiže granicu
+boundary\_x nakon čega prelazi u novi red, uvećava Y koordinatu a X koordinatu
+postavlja na nulu. \\
+
+Nakon što hopper dostigne obe granice boundary\_x i boundary\_y završen je
+trenutni stepen skaliranja slike i potrebno je uvećati scale\_num za jedan.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+    \input{images/tikz/hop_sweep/hop_sweep3.tex}
+    \input{images/tikz/hop_sweep/hop_sweep4.tex}
+    }
+\caption{Prelazak \textbf{hopper}-a u novi red.}
+\label{hop_sweep2}
+\end{figure}
 
 \subsubsection{Skaliranje adrese}\label{address_scaling_sec}
 
 Unutar sweeper-a je implementirano i skaliranje adrese u svrhu skaliranja slike
 objašnjeno u sekciji \ref{image_scaling}. \\
-Potrebno je množiti adresu sa decimalnim faktorom (npr. $1.2$, $1.33$), kako je
-u hardveru množenje sa decimalnim brojevima sa pokretnom tačkom skupa operacija,
-efikasnije je odraditi množenje sa fiksnom tačkom. \\
-To je odrađeno tako što celobrojni faktor unapred softverski izračunat i smešten
-u scale\_ratio modul, isto tako je i broj pomeranja u desno dobijene binarne
+Kako bi se adresa skalirala potrebno je množiti adresu sa decimalnim faktorom (npr. $1.2$, $1.33$).
+kako je u hardveru množenje sa decimalnim brojevima sa pokretnom tačkom skupa operacija,
+množenje sa fiksnom tačkom je efikasnije. \\
+To je odrađeno tako što je celobrojni faktor za množenje unapred softverski izračunat i smešten
+u scale\_ratio modul opisan ranije, isto tako je i broj pomeranja u desno dobijene binarne
 vrednosti unapred poznat.
-Pa je jednostavno odraditi množenje sa fiksnom tačkom. \\
+Na ovaj način je ušteđeno dosta hardverskih resursa. \\
+
+
+\begin{figure}[H]
+  \centering
+  \resizebox{.4\textwidth}{!}{%
+    \input{images/tikz/hop_sweep/hop_sweep_scale.tex}
+  }
+  \caption{Posledica skaliranja adrese.}
+  \label{hop_sweep_scale}
+\end{figure}
 
 Ovako skalirana adresa prikazana je na slici (\ref{hop_sweep_scale}).
 Može se videti da će u ovom slučaju svaka četvrta tačka biti preskočena.
 Na taj način će se dobiti manja slika od originalne, u ovom primeru od početne
 slike $10*10$ dobija se slika $8*8$. \\
 Na taj način objekti koji su izgledali veći na originalnoj slici će izgledati
-manji na skaliranoj slici, što nam je potrebno kako bi dobili invarijantnost
-veličine opisane u sekciji \ref{image_scaling}.
-
-\begin{figure}[H]
-  \centering
-  \scalebox{0.7}{
-    \input{images/tikz/hop_sweep/hop_sweep_scale.tex}
-    }
-\caption{Posledica skaliranja adrese.}
-\label{hop_sweep_scale}
-\end{figure}
+manji na skaliranoj slici, što nam je potrebno kako bi dobili nezavisnost
+detekcije od veličine objekta, opisano u sekciji \ref{image_scaling}.
 
 \subsubsection{Modul addr\_trans}\label{addr_trans_sec}
 
-Konačno je potrebno konvertovati adresu predstavljenu koordinatama (y, x) u
-linearnu adresu, pošto se RAM memorija adresira linearno. Ovo obavlja
-addr\_trans u hardveru. \\
-Translaciju je jednostavno uraditi pomoću seledeće formule.
+Zamišljanje slike kao dvodimenzionalne matrice je intuitivno.
+Međutim podaci u RAM memoriji su složeni u jednodimenzionalnom nizu i tako se
+trebaju adresirati. \\
+Kako bi se ova neusklađenost rešila potrebrebno je linearizovati adresu dobijenu
+iz prethodnih modula. \\
+Odnosno adresu u formatu (y, x) treba pretvoriti u linearnu pomoću sledeće formule:
 
 \begin{equation}
   \Scale[1.2]{lin\_addr = (y * img\_width) + x}
   \label{IntegralImage_eq2}
 \end{equation}
 
+\noindent
 Gde su y i x koordinate iz sweeper-a a img\_width je parametar koji označava
 širinu slike.
-
-\newpage
+Operaciju skaliranja obavlja modul \textbf{addr\_trans}. \\
 
 \subsection{Modul ii\_gen i sii\_gen} \label{ii_sii_gen_sec}
 
@@ -233,29 +247,31 @@ Gde su y i x koordinate iz sweeper-a a img\_width je parametar koji označava
 
 Jedan od kritičnih delova Viola-Jones algoritma je generisanje integralne slike
 opisane u poglavlju \ref{ii_sec}. \\
-Isto tako se ispostavlja da i u hardverskoj implementaciji generisanje
+Ispostavlja da i u hardverskoj implementaciji generisanje
 integralne slike ima veliki uticaj na performanse i potrebne hardverske resurse sistema. \\
 
-Kao izbor možemo izabrati sekvencijalni ili paralelni algoritam. \\
+Možemo izabrati sekvencijalni ili paralelni algoritam. \\
 Ukoliko bi se odabrao paralelni algoritam koji može da računa više piksela u paraleli
-povećanje resursa bi se drastično odrazilo na img\_ram i frame\_buffer memorije.
+povećanje resursa bi se drastično odrazilo na \textbf{img\_ram} i \textbf{frame\_buffer} memorije.
 Ali bi dobili bolje performanse sistema. \\
 Kako bi implementacija paralelnog algoritma povećala kompleksnost ne samo ovog
-modula nego i okolnih komponenti, u ovom projektu on neće biti razmatran.
+modula nego i okolnih komponenti, u ovom projektu paralelni algoritam neće biti razmatran.
 
 \subsubsection{Sekvencijalna implementacija generatora integralne slike}\label{ii_seq_alg_sec}
 
-U ovoj arhitekturi odabran je sekvencijalni algoritam generisanja integralne
-slike koji odgovara jednačini(\ref{IntegralImage_eq2}) iz sekcije \ref{ii_sec}.
-\\
-Prednosti ovog algoritma u odnosu na paralelni je manji memorijski zahtevi na
-ulazu i izlazu, potrebno manje funkcionalnih jedinica i unutrašnje memorije. A
-mana je manja brzina. \\
-Konkretno ovaj algoritam može da izračuna jedan piksel svaki takt. \\
+Zbog jednostavnosti i potrebom za malim brojem resursa za ovu arhitekturu
+odabran je sekvencijalni algoritam generisanja integralne slike koji odgovara
+jednačini(\ref{IntegralImage_eq2}) iz sekcije \ref{ii_sec}.\\
+
+Prednosti ovog algoritma u odnosu na paralelni su manji memorijski zahtevi na
+ulaznom i izlaznom interfejsu, potrebno je manje funkcionalnih jedinica i
+unutrašnje memorije.
+Dok je  mana je manja brzina računanja. \\
+Ovaj algoritam izračunava po jedan piksel svaki takt. \\
 
 \begin{figure}[H]
   \centering
-  \scalebox{1.0}{
+  \resizebox{\textwidth}{!}{%
     \input{images/tikz/ii_gen.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
@@ -265,20 +281,24 @@ Konkretno ovaj algoritam može da izračuna jedan piksel svaki takt. \\
 Na slici(\ref{ii_gen}) prikazana je uprošćena šema generatora integralne slike.
 \\
 
-Na ulazu module je port img\_in koji predstavlja piksele slike pročitane iz
-img\_ram memorije. \\
+Ulazni interfejs ovom modula se povezuje izlaznim interfejsom IMG RAM memorije.
+\\
 
-Pikseli u redu se akumuliraju pomoću sabirača i registra unutar accum modula.
+Pikseli u istom redu se akumuliraju pomoću sabirača i registra unutar accum modula.
 Na slici je izostavljeno da se registar dreg resetuje posle dolaska poslednjeg
-piksela u redu slike. \\
+piksela u redu prozora.
+Ovo je moguće dodavanjem dodatnih polja uz vrednost ulaznog piksela, koji
+predstavljaju kraj transakcije za red i kolonu.
+O ovom konceptu će biti više reči u sekciji posvećenoj PyGears tipovima. \\
 
-Nakon toga akumulirana vrednost se sabira sa vrednošću FIFO bafera koji sadrži
+Nakon toga akumulirana vrednost se sabira sa sadržajem FIFO bafera koji sadrži
 vrednost piksela integralne slike iz predhodnog reda.
-Zatim prosleđuje na izlaz i ponovo upisuje u FIFO bafer kao vrednost izračunate
-integralne slike.\\
+Zatim se vrednost prosleđuje na izlaz i ponovo upisuje u FIFO bafer.
+Iz FIFO bafer-a će na ovaj način izlaziti vrednosti piksela iz prethodnog reda,
+a bafer će se puniti vrednostima trenutnog reda. \\
 
 \noindent
-Zbog potreba algoritma FIFO bafer je modifikovan na sledeći način:
+U ovom slučaju standardan FIFO bafer je modifikovan na sledeći način:
 \begin{itemize}
   \item Dodat je PRELOAD parametar koji pomera pokazivač za upis na vrednost
     širine prozora (feature\_width) prilikom reseta. Ovo je potrebno da bi se
@@ -290,32 +310,31 @@ Zbog potreba algoritma FIFO bafer je modifikovan na sledeći način:
 
 Generator kvadratne integralne slike je potreban za računanje standardne
 devijacije prozora što je opisano u sekciji \ref{lumi_inv_sec}. \\
-Generisanje kvadratne integralne slike je jednostavno uz gotov generator
+Generisanje kvadratne integralne slike je jednostavno uz korišćenje generatora
 integralne slike.
 Potrebno je kvadrirati ulazne piksele i dovesti ih na generator integralne slike
 kao na slici(\ref{sii_gen}).
 
 \begin{figure}[H]
   \centering
-  \scalebox{1.0}{
+  \resizebox{0.7\textwidth}{!}{%
     \input{images/tikz/sii_gen.tex}
     }
 \caption{Blok dijagram ii\_gen modula}
 \label{sii_gen}
 \end{figure}
 
-\newpage
-
 \subsection{Modul frame\_buffer}
 
 Potrebno je obezbediti da se generisana integralna slika može pročitati od
-strane klasifikatora u nasumičnom maniru.
+strane klasifikatora u nasumičnom maniru i da vrednost bude dostupna u roku od
+jednog takta.
 Kako bi se to obezbedilo potrebno je skladištiti integralnu sliku u lokalnu RAM
 memoriju. \\
 
 \begin{figure}[H]
   \centering
-  \scalebox{1.0}{
+  \resizebox{0.85\textwidth}{!}{%
     \input{images/tikz/frame_buffer.tex}
     }
 \caption{Blok dijagram frame\_buffer-a realizovanog sa 3 jedno-portne RAM memorije.}
@@ -323,33 +342,42 @@ memoriju. \\
 \end{figure}
 
 U ovu svrhu je projektovana komponenta frame\_buffer.
-Sastoji se od brojača za adresu upisa i RAM memorije.
-Brojač adrese upisa se inkremetuje za jedan nakon svakog primljenog podatka. \\
+Sastoji se od brojača za adresu upisa i RAM memorija.
+Brojač adrese upisa se inkremetuje za jedan nakon svakog primljenog podatka kao
+i kod IMG RAM modula.
+Brojač nije prikazan na blok dijagramu iznad. \\
 Potrebna veličina RAM memorije je data sledećim vezama:
 
-\begin{equation}
-  \Scale[1.2]{ size(bit) = frame\_width * frame\_height * w\_ii}
-  \label{frame_buffer_eq1}
-\end{equation}
+\begin{figure}[H]
+  \begin{subfigure}
+    \begin{equation}
+      size[bit] = frame\_width * frame\_height * w\_ii
+      \label{frame_buffer_eq1}
+    \end{equation}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}
+    \begin{equation}
+      w\_ii = ceil(log_2(frame\_width * frame\_height * 2^{w\_img}))
+      \label{frame_buffer_eq2}
+    \end{equation}
+  \end{subfigure}
+\end{figure}
 
-\begin{equation}
-  \Scale[1.2]{ w\_ii = ceil(log_2(frame\_width * frame\_height * 2^{w\_img}))}
-  \label{frame_buffer_eq2}
-\end{equation}
-
-Gde je frame\_width i frame\_height širina i visina obeležja modela, w\_ii je
-širina magistrale integralne slike, a w\_img ulazna širina magistrale piksela
+Gde su frame\_width i frame\_height širina i visina obeležja modela, w\_ii je
+širina magistrale integralne slike, w\_img je ulazna širina magistrale piksela
 slike. \\
 
 Radi ubrzavanja rada klasifikatora možemo računati sva tri pravougaonika (\ref{haar_features_sec}) u paraleli.
 Da bi se to obezbedilo potrebno je čitati u istom taktu tri vrednosti iz
 frame\_buffer memorije.
 Kako je više-portna memorija skupa i retko se nalazi u FPGA čipovima moguće
-rešenje je koristiti tri jedno-portne memorije.
-Ovo će kao rezultat zauzeti tri puta više RAM memorije na čipu.\\
+rešenje je koristiti tri dvo-portne memorije.
+Ovo će kao rezultat zauzeti tri puta više RAM memorije na čipu, od koje će svaka
+imati isti sadržaj.\\
 
-Alat za sintezu uglavnom može da odradi transformaciju i da od jedne tro-portne
-memorije napravi tri jedno-portne.
+Alat za sintezu uglavnom može da odradi transformaciju i da od jedne šesto-portne
+memorije instancionira tri dvo-portne.
 Ali se preporučuje da se ekslicitno instancioniraju tri memorije i pridržava
 Synthesis Guideline-a npr. Xilinx \cite{XST}. \\
 Primer prikazan na slici(\ref{frame_buffer_bd}).
@@ -357,9 +385,9 @@ Primer prikazan na slici(\ref{frame_buffer_bd}).
 \subsection{Modul stddev}
 
 Računanje standardne devijacije prozora je potrebno kako bi se smanjio uticaj
-različitog osvetljenja lica na slikama. \\
+različitog osvetljenja objekata na slikama. \\
 Za ovo je zadužen modul stddev. U sledećem primeru prikazano je računanje
-standardne devijacije u C-u.
+standardne devijacije u C++-u.
 
 \begin{lstlisting}[language=C++,caption={Primer računanja standardne devijacije u \textbf{C}-u},captionpos=b, label=stddev_code]
   long calcStddev(long sii[FRAME_HEIGHT][FRAME_WIDTH],
@@ -378,18 +406,18 @@ standardne devijacije u C-u.
   }
 \end{lstlisting}
 
-Za računanje standardne devijacije potrebni su nam ivice prozora integralne i
+Za računanje standardne devijacije potrebne su pikseli ivice prozora integralne i
 kvadratne integralne slike, što se vidi u liniji 6 i 8
 primera(\ref{stddev_code}). \\
 Sabiranjem gornjeg levog i donjeg desnog piksela zatim oduzimanje gornjeg desnog
 i donjeg levog integralne slike dobijamo sumu piksela celog prozora. \\
 Ako pogledamo primer u C-u vidimo da imamo operacije sabiranja, oduzimanja,
-kvadriranja  promenljivih, zatim množenje sa konstantom. \\
+kvadriranja promenljivih, zatim množenje sa konstantom. \\
 Sa ovim operacijama većina alata za sintezu nema problem prilikom mapiranja i
 većina FPGA čipova ima potrebne funkcionalne jedinice. \\
 
 Konačno potrebno je odraditi kvadratni koren u liniji 12. \\
-Ovo je operacija koju većina alata za automatsku sintezu ne mogu implementirati
+Ovo je operacija koju alati za automatsku sintezu ne mogu implementirati
 na FPGA čipovima, pa je potrebno pronaći dobru aproksimaciju. \\
 
 U ovom projektu je odlučeno koristiti lookup tabelu. \\
@@ -400,7 +428,7 @@ rad celog sistema, uz minimalan gubitak pouzdanosti. \\
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.9}{
+  \resizebox{1\textwidth}{!}{%
     \input{images/tikz/stddev.tex}
     }
 \caption{Blok dijagram stddev modula.}
@@ -412,7 +440,8 @@ modula na osnovu primera(\ref{stddev_code}}).
 Operaciju sabiranja piksela unutar prozora obavljaju frame\_sum moduli.
 Mogu se videti i operator kvadriranja, množenja zatim i oduzimanja kao u
 prethodnom primeru. \\
-Lookup tabela je implementirana kao ROM memorija, nazvana SQRT\_ROM sa 256 lokacija.
+Lookup tabela je implementirana kao \gls{rom} memorija, pod nazivom SQRT\_ROM i
+sadrži 256 memorijskih lokacija.
 
 \subsection{Modul features\_mem} \label{features_meme_sec}
 
@@ -420,18 +449,20 @@ Svako obeležje u modelu se sastoji od najviše tri pravougaonika što je
 objašnjeno u sekciji \ref{haar_features_sec}. \\
 Svaki pravougaonik je definisan sa četiri koordinate (A, B, C, D) i sa težinom
 njegove površine. \\
+Zbog čestog i ponovljenog pristupa ovim obeležjima potrebno ih je skladištiti u
+lokalnoj memoriji. \\
 
 Zbog uštede memorije u hardverskoj implementaciji, moguće je svaki pravougaonik predstaviti koordinatom jedne njegove tačke zatim
 širinom i visinom pravougaonika.
 Ostale tačke je moguće izračunati pomoću ovih podataka. \\
 Na ovaj način se vrši ušteda memorije, ali se uvodi potreba za množačima i
-sabiračima u hardveru.
+sabiračima za računanje ostalih koordinata.
 U ovom slučaju zbog velikog broja obeležja (2913 u testiranom modelu \ref{haarcascade_frontal_sec}) ušteda
 memorije je značajna, a dodatni sabirači i množači ne unose veliku cenu u sistem.
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}{
+  \resizebox{0.6\textwidth}{!}{%
     \input{images/tikz/rect_mem_unpack.tex}
     }
 \caption{Reprezentacija pravougaonika u obeležju.}
@@ -446,6 +477,8 @@ Kako je za adresiranje podatka iz RAM-a potrebna linearna adresa kao što je
 objašnjeno u sekciji(\ref{addr_trans_sec}) koordinata tačke A je linearizovana u
 softveru. \\
 Ostale koordinate moguće je dobiti na sledeći način:
+
+\newpage
 
 \setlength{\belowdisplayskip}{0pt} \setlength{\belowdisplayshortskip}{0pt}
 \setlength{\abovedisplayskip}{0pt} \setlength{\abovedisplayshortskip}{0pt}
@@ -467,30 +500,50 @@ Ostale koordinate moguće je dobiti na sledeći način:
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
-    \begin{tabular}{| P{1.5cm} | P{2.5cm} | P{2cm} | P{2cm} | P{4cm} |}
+  \begin{tabular}{| P{1.5cm} | P{2.5cm} |}
     \hline
-     N & Packed value(20 bit) & Height (5bit) & Width (5bit) & A linear coord (10bit) \\ \hline
-      0 &0x1A989 & 9 & 12 & 106 \\ \hline
-      1 &0x1A987 & 7 & 12 & 106 \\ \hline
-      2 &0x39249 & 9 & 18 & 228 \\ \hline
-      3 &0x72926 & 19 & 9 & 458 \\ \hline
-      $.$ & $.$ & $.$ & $.$ & $.$ \\
-      $.$ & $.$ & $.$ & $.$ & $.$ \\
-      $.$ & $.$ & $.$ & $.$ & $.$ \\ \hline
-      feature num - 1 &0x088d6 & 22 & 6 & 34 \\ \hline
-    \end{tabular}
-    \captionof{table}{Struktura memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_struct}
+    N & Packed value(20 bit) \\ \hline
+    0 &0x1A989 \\ \hline
+    1 &0x1A987 \\ \hline
+    2 &0x39249 \\ \hline
+    3 &0x72926 \\ \hline
+    $.$ & $.$ \\
+    $.$ & $.$ \\
+    $.$ & $.$ \\ \hline
+    feature num - 1 &0x088d6 \\ \hline
+  \end{tabular}
+  \captionof{table}{Struktura zapakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_packed_struct}
 \end{center}
 
-Na tabeli(\ref{rect_rom_struct}) je prikazana strukura zapakovane memorije
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{center}
+  \centering
+    \begin{tabular}{| P{1.5cm} | P{2cm} | P{2cm} | P{4cm} |}
+    \hline
+     N  & Height (5bit) & Width (5bit) & A linear coord (10bit) \\ \hline
+      0 & 9 & 12 & 106 \\ \hline
+      1 & 7 & 12 & 106 \\ \hline
+      2 & 9 & 18 & 228 \\ \hline
+      3 & 19 & 9 & 458 \\ \hline
+      $.$ & $.$ & $.$ & $.$ \\
+      $.$ & $.$ & $.$ & $.$ \\
+      $.$ & $.$ & $.$ & $.$ \\ \hline
+      feature num - 1 & 22 & 6 & 34 \\ \hline
+    \end{tabular}
+    \captionof{table}{Struktura raspakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_unpacked_struct}
+\end{center}
+
+Na tabeli(\ref{rect_rom_packed_struct}) je prikazana strukura zapakovane memorije
 rect\_ROM \\
+Dok je tabeli(\ref{rect_rom_unpacked_struct}) prikazana polja raspakovane
+memorije rect\_ROM \\
 U prvoj koloni \textbf{N} su adrese lokacija, kojih ima features\_num (2913 u modelu
 \ref{haarcascade_frontal_sec}). \\
-U drugoj koloni \textbf{Packed value(20 bit)} je zapakovana vrednost memorijske lokacije na
+Na prvoj tabeli drugoj koloni \textbf{Packed value(20 bit)} je zapakovana vrednost memorijske lokacije na
 adresi u heksadecimalnom zapisu. \\
-U trećoj i četvrtoj koloni se nalaze \textbf{height} i \textbf{width}
+Na drugoj tabeli na drugoj i trećoj koloni se nalaze \textbf{height} i \textbf{width}
 raspakovane vrednosti visine i širine pravougaonika. \\
-U poslednjoj koloni se nalazi \textbf{A linear coord} raspakovana vrednost
+Na drugoj tabeli i poslednjoj koloni se nalazi \textbf{A linear coord} raspakovana vrednost
 linearne koordinate A. \\
 
 Pored rect\_ROM memorije potrebna je weight\_ROM memorija koja će čuvati
@@ -498,7 +551,7 @@ vrednosti težina za svaki pravougaonik.
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.8}{
+  \resizebox{0.9\textwidth}{!}{%
     \input{images/tikz/features_mem.tex}
     }
 \caption{Blok dijagram features\_mem modula.}
@@ -512,7 +565,7 @@ Komponenta \textbf{feature\_counter} generiše adresu za čitanje iz ROM memorij
 Postoje po 3 \textbf{rect\_ROM} i \textbf{weight\_ROM} memorije prethodno
 opisane, po jedna za svaki pravougaonik u obeležju. \\
 Komponenta \textbf{calc\_coords} vrši raspakivanje memorije opisane u
-tablici(\ref{rect_rom_struct}) na način opisan
+tablici(\ref{rect_rom_packed_struct}) na način opisan
 formulama(\ref{rects_calc_coords_B}, \ref{rects_calc_coords_D},
 \ref{rects_calc_coords_C}}). \\
 
@@ -533,7 +586,7 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
      \textbf{rect\_num} & \rectNum{}  \\ \hline
      \textbf{w\_weight} & \wWeight{} bits  \\ \hline
      \textbf{w\_rect} & \wRect{} bits  \\ \hline
-      \cellcolor{green!35} \textbf{TOTAL} & \cellcolor{green!35} \result{} bits \\ \hline
+      \cellcolor{green!35} \textbf{TOTAL} & \cellcolor{green!35} \num[group-separator={,}]{\result{}} bits \\ \hline
     \end{tabular}
     \captionof{table}{Veličina memorije features\_mem za model \ref{haarcascade_frontal_sec}} \label{feature_mem_size}
 \end{center}
@@ -542,14 +595,14 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
 
 \subsection{Modul classifier}
 
-Classifier modul obavlja klasifikaciju prozora, odnosno signalizira da li se na
-trenutnom prozoru nalazi traženi objekat.
-Zauzima najviše hardverskih resursa u sistemu i pored ii\_gen(\ref{ii_sii_gen_sec})
-modula najviše utiče na performanse sistema.
+\textbf{Classifier} modul obavlja samu klasifikaciju prozora.
+Pored ii\_gen(\ref{ii_sii_gen_sec}) modula najviše utiče na performanse sistema. \\
+
+Na slici ispod je prikazan blok dijagram klasifikatora.\\
 
 \begin{figure}[H]
   \centering
-  \scalebox{0.80}{
+  \resizebox{0.9\textwidth}{!}{%
     \input{images/tikz/classifier.tex}
     }
 \caption{Blok dijagram classifier modula.}
@@ -631,12 +684,41 @@ leaf\_val1 za to obeležje. \\
 
 Ukoliko je težinska suma manja od praga obeležja feature\_threshold
 pomnoženog sa standardnom devijacijom, povratna vrednost će biti iz memeorije
-leaf\_val0, u suprotnom povratna vrednost će biti iz memorije leaf\_val1.
+leaf\_val0, u suprotnom povratna vrednost će biti iz memorije leaf\_val1. \\
+
+Dalje je potrebno akumulirati vrednosti unutar etape i uporediti sa pragom
+etape.
+Ukoliko je akumulirana vrednost manja od praga etape može se zaključiti da se na
+posmatranom prozoru ne nalazi objekat.
+Ukoliko je akumulirana vrednost veća od praga etape na posmatranom prozoru se
+može naći objekat i potrebno je izvršiti sledeću etapu. \\
+
+\begin{lstlisting}[language=C++,caption={Leaf\_val u \textbf{C}-u},captionpos=b, label=leaf_val_code]
+  int stage_res(int leaf_val,
+                int feature_start,
+                int feature_end){
+  int64_t sum = 0;
+
+  for(int feature_num = feature_start;
+      feature_num < feature_end;
+      feature_num++){
+    sum += leaf_val;
+  }
+
+  if(sum < stageThresholds[stage_num]) return -1;
+  else return 1;
+}
+\end{lstlisting}
+
+U hardverskoj implementaciji ukoliko je akumulirana vrednost etape manja od
+praga etape, aktiviraće se local\_rst modul i resetovati \textbf{classifier}
+modul, ovo će signalizirati ostatku sistema da se na posmatranom prozoru ne
+nalazi objekat. \\
 
 \subsection{Interfejsi}
 
 Komunikacija svih unutrašnjih modula i komunikacija IP jezgra sa okolinom
-realizovana je pomoću \textbf{DTI}(data transfer interface)\cite{PyGears_OSDA} interfejsa. \\
+realizovana je pomoću \textbf{\gls{dti}}\cite{PyGears_OSDA} interfejsa. \\
 Korišćenjenjem ovog interfejsa dobijena je robusnija komunikacija između
 modula zahvaljujući \emph{handshaking}-u. \\
 

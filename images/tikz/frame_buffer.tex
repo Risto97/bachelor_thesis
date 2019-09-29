@@ -1,6 +1,8 @@
 \pgfdeclarelayer{background}
+\pgfdeclarelayer{layer1}
+\pgfdeclarelayer{layer2}
 \pgfdeclarelayer{foreground}
-\pgfsetlayers{background,main,foreground}
+\pgfsetlayers{background, layer2, layer1 ,main,foreground}
 
 \tikzstyle{cloud1} = [draw=black, thick, fill=red!20, minimum height = 1em]
 \tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=2.5cm]
@@ -36,27 +38,6 @@
   \node [coordinate, below left = -0.75cm and 0cm of ram2] (ram2_ii){};
   \node [coordinate, left = 2cm of ram2_ii] (ram2_ii_point){};
 
-  % \node [block_m, above right = 0cm and 1.25cm of scale_counter] (boundaries) {boundaries};
-  % \node [coordinate, left = 0cm of boundaries] (boundaries_in){};
-  % \node [coordinate, right = 0cm of boundaries] (boundaries_out){};
-
-  % \node [block_m, below right = 0cm and 1.25cm of scale_counter] (scale_ratio) {scale\_ratio};
-  % \node [coordinate, left = 0cm of scale_ratio] (scale_ratio_in){};
-  % \node [coordinate, right = 0cm of scale_ratio] (scale_ratio_out){};
-
-  % \node [block_l, right = 2cm of boundaries] (hopper) {\Large hopper};
-  % \node [coordinate, left = 0cm of hopper] (hopper_boundaries_in){};
-  % \node [coordinate, below = 0cm of hopper] (hopper_out){};
-
-  % \node [block_l, right = 2cm of scale_ratio] (sweeper) {\Large sweeper};
-  % \node [coordinate, above = 0cm of sweeper] (sweeper_hop_in){};
-  % \node [coordinate, left = 0cm of sweeper] (sweeper_scale_in){};
-  % \node [coordinate, right = 0cm of sweeper] (sweeper_out){};
-
-  % \node [block_m, right = 1.25cm of sweeper] (addr_trans) {addr\_trans};
-  % \node [coordinate, left = 0cm of addr_trans] (addr_trans_in){};
-  % \node [coordinate, right = 0cm of addr_trans] (addr_trans_out){};
-
   %% group %%
  \begin{pgfonlayer}{background}
   \node[inner sep=15pt, fill=yellow!25, rounded corners, inner ysep =30pt, draw, thick,fit=(ram0) (ram1) (ram2)(ram0_rect_addr_point)(ram1_rect_addr_point)(ram2_rect_addr_point)(ram2_out_point) (ram1_out_point)(ram0_out_point) ] (frame_buffer) {};
@@ -83,7 +64,5 @@
   \path [line, very thick] (ram1_out_point) -- (rect_data_out) node[transition, yshift=0.3cm, xshift=-1.2cm] {\textbf{rect\_data}} ;
 
   \path [line, very thick] (ii_in_group_point) node[transition, yshift=0.3cm, xshift=+0.5cm] {\textbf{ii\_in}}  -- (ii_in_group);
-%   \path [line] (sweeper_out) node[transition, yshift=0.2cm, xshift=0.6cm] {sweep} -- (addr_trans_in);
-%   \path [line] (addr_trans_out)-- +(1.5cm, 0) node[transition, yshift=0.3cm, xshift=-0.5cm] {rd\_addr} ;
 
 \end{tikzpicture}

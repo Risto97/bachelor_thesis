@@ -2,37 +2,35 @@
 
 \subsection{Uvod}
 
-PyGears\cite{pygears_site} je open-source projekat koji uvodi Gears metodologiju za projektovanje
-hardvera i Python Framework koji implementira Gears metodologiju. \\
-Gears metodologija uvodi lako povezivanje i kompozabilnost sistema od manjih
+PyGears\cite{pygears_site} pozajmljuje koncepte iz funkcionalnog programiranja i primenjuje ih na
+dizajnu digitalnog hardvera \\
+Sastoji se od Gears metodologije i Python Framework koji implementira Gears metodologiju. \\
+Gears metodologija omogućava lako povezivanje i kompozabilnost sistema pomoću manjih
 funkcionalnih jedinica pod nazivom gear-ovi. \\
-Gear moduli su međusobno povezani DTI interfejsom koji implementira jednostavan
+Gear moduli su međusobno povezani \gls{dti} interfejsom koji implementira jednostavan
 handshake protokol.
-Na ovaj način je omogućeno je lako ponovno korišćenje implementiranih funkcija i
-jednostavno debagovanje dizajna. \\
+Korišćenjem standardnog generičkog interfejsa omogućeno je lako povezivanje ovih
+komponenti. \\
 
-Pisanjem dizajna u Python-u koji je dinamičan jezik i veoma visokog nivoa
-apstrakcije omogućena je dodatno bolje parametrizovanje, skalabilnost i kompozabilnost dizajna. \\
+Opisom hardvera u Python-u koji je dinamičan jezik i veoma visokog nivoa mogu se
+napisati gear-ovi koji su veoma apstraktni i generički, time je omogućeno lako
+ponovno korišćenje modela. \\
 
-Takođe omogućeno je pisanje verifikacije u Python-u na veoma visokom nivou
-apstrakcije uz korišćenje ogromnog broja besplatno dostupnih Python paketa za
-većinu problema i algoritama, time je skraćeno vreme i olakšan posao prilikom
-pisanja referentnih modela. \\
+PyGears takođe omogućava i verifikaciju u Python-u. Implementiran je interfejs
+ka popularnim komercijalnim simulatorima Questa, NCSim i open source Verilator,
+tako da je moguća kosimulacija između Python okruženja i \gls{hdl} modela. \\
 
-PyGears konačno obavlja konverziju Python opisa u SystemVerilog opis koji
+PyGears konačno obavlja konverziju Python opisa u \gls{sv} opis koji
 je podržan od strane alata za sintezi i simulaciju.
 
 \subsection{Poređenje sa RTL metodologijom}
 
-PyGears\cite{PyGears_OSDA} predstavlja alternativu RTL\cite{chu2006rtl} metodologiji za opis hardvera.
+PyGears\cite{PyGears_OSDA} predstavlja alternativu \gls{rtl}\cite{chu2006rtl} metodologiji za opis hardvera.
 RTL metodologija pruža standardan način translacije sekvencijalnog algoritma u
 hadverski opis.
-Struktura dobijena pomoću RTL metodologije uglavnom se sastoji od \textbf{FSMD}(Finite
-State Machine with Datapath). \\
-Datapath deo koji sadrži funkcionalne i memorijske jedinice i
-mreže za rutiranje podataka\cite{PSDS_5} \\
-Mašina stanje koja sadrži registre stanja, logiku za izlazne signale i logiku za
-sledeće stanje. \\
+Struktura dobijena pomoću RTL metodologije uglavnom se sastoji od \textbf{\gls{fsmd}}. \\
+Datapath sadrži funkcionalne i memorijske jedinice i mreže za rutiranje podataka\cite{PSDS_5} \\
+Controlpath diriguje podacima u Datapath delu i sačinjena je od mašine stanja.\\
 
 Kako dizajn implementiran pomoću RTL metodologije postaje kompleksniji i mašina
 stanja postaje kompleksnija i sadrži više stanja.
@@ -43,13 +41,13 @@ sistemima koji su Dataflow orijentisani.
 \subsection{Jezici za opis hardvera}
 
 Jezici sa opis hardvera koji se danas daleko najviše koriste su Verilog i VHDL,
-nastali su u 1984. i 1983. godine i daleko su siromašniji po mogućnostima od današnjih
-jezika višeg nivoa kao što su Python, C++, itd. \\
+nastali su 1984. i 1983. godine i daleko su siromašniji po mogućnostima od današnjih
+jezika višeg nivoa kao što su Python, C++. \\
 Najveća prednost ovih jezika je podrška od strane alata za sintezu i simulaciju,
 kako se ovi jezici koriste za opis i verifikaciju hardvera preko 30 godina,
-alati su zreli i detaljno istestirani. \\
+alati su zreli i dobro istestirani. \\
 
-Sve velike kompanije koje proizvode FPGA čipove trenutno ne objavljuju
+Sve kompanije koje proizvode FPGA čipove trenutno ne objavljuju
 arhitekturu svojih FPGA čipova, pa alati za sintezu i implementaciju zavise od
 tih kompanija\footnote{Postoji inicijativa da se dokumentuju FPGA čipovi svih velikih
 proizvođača u projektu zvanom SymbiFlow\cite{SymbiFlow}, kao i alati za sintezu
@@ -65,42 +63,43 @@ HDL kod u Verilog-u, SystemVerilog-u ili VHDL-u pogodnom za simulatore i alate
 za sintezu. \\
 
 Dok se ovi jezici uglavnom baziraju na RTL metodologiji i uvode jezik višeg
-nivoa kao zamenu za standardan HDL. PyGears dodatno izdvaja i uvođenje nove
-metodologije zvane Gears.
+nivoa kao zamenu za standardan HDL.
+PyGears dodatno izdvaja i uvođenje nove metodologije zvane Gears.
 
 \subsection{Gears metodologija}
-Cilj Gears metodologije je da se obezbedi bolja kompozabilnost i ponovno
-korišćenje napisanih modula. \\
-Kako bi se ovo postiglo uveden je standardan interfejs za komunikaciju između
-modula.
+Gears metodologija obezbeđuje bolju kompozabilnost i ponovno korišćenje
+napisanih hardverskih modela. \\
+Kako bi se ovo postiglo uveden je standardan generički handshaking interfejs za
+komunikaciju između modula.
 
 \subsubsection{DTI interfejs}
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
-  \includegraphics[width=9cm]{dti}
+  \includegraphics[width=0.5\linewidth]{dti}
   \caption{DTI interfejs\cite{PyGears_OSDA}}
   \label{DTI_intf_img}
 \end{figure}
 
-Uveden je interfejs \textbf{DTI}(data transfer interface).
-Podaci se šalju od strane Producer-a prema Consumer-u.
-Sastoji se od:
+Jednostavan \textbf{\gls{dti}} interfejs se koristi za komunikaciju između gear-ova.
+Modul koji šalje podatke se naziva Producer, a modul koji prima podatke se
+naziva Consumer. \\
+DTI se sastoji od sledećih signala:
 \begin{itemize}
 \item \textbf{Data} linije za podatke, proizvolje širine i proizvoljnog tipa.
-\item \textbf{Valid} jednobitnog signala kojim Producer signalizira validnost
-  podatka na Data liniji.
-\item \textbf{Ready} jednobitnog signala kojim Consumer signalizira da je
-  pročitao podatak na Data liniji.
+\item \textbf{Valid} jednobitan signal kojim upravlja Producer i signalizira da
+  je podataka na Data liniji validan.
+\item \textbf{Ready} jednobitan signal kojim upravlja Consumer i signalizira da je
+  konzumirao podatak sa Data linije i spreman za novi podatak.
 \end{itemize}
 Pomoću Valid i Ready signala realizovan je handshaking protokol. \\
 
 \begin{figure}[H]
-\centering{
-  \scalebox{1.2}{
-    \input{images/tikz/pygears/dti_trans.tex}
-  }}
-\caption{DTI primer transakcije}
-\label{dti_example1}
+  \centering{
+    \resizebox{0.75\textwidth}{!}{%
+      \input{images/tikz/pygears/dti_trans.tex}
+    }}
+  \caption{DTI primer transakcije}
+  \label{dti_example1}
 \end{figure}
 
 Na slici(\ref{dti_example1}) prikazan je talasni oblik protokola:
@@ -109,10 +108,10 @@ Na slici(\ref{dti_example1}) prikazan je talasni oblik protokola:
   jedinicu. Što označava validan podatak na magistrali.
 \item Istog trenutka nakon postavljanja Valid signala na jedinicu Consumer može
   da koristi podatak na magistrali.
-\item Consumer može koristiti podatak na magistrali potreban broj taktova.
+\item Consumer može koristiti podatak potreban broj taktova.
 \item Kada Consumer završi sa korišćenjem podatka, postavlja Ready signal na
   jedinicu čime označava ACK(acknowledgment) odnosno signalizira da je završio
-  sa podatkom na magistrali i da je handshake obavljen. \\
+  sa podatkom na magistrali i da je spreman za sledeći podatak. \\
   Nakon handshake-a Producer može postaviti novi podatak na magistralu.
 \item Producer ne sme menjati podatak na magistrali sve do pojave ACK od strane
   Consumera.
@@ -120,7 +119,7 @@ Na slici(\ref{dti_example1}) prikazan je talasni oblik protokola:
   obavljati transakcije na magistrali.
 \item Ne sme postojati kombinaciona putanja od Ready do Valid signala na strani
   Producer-a.
-  Odnosno Producer ne sme odlučivati o postavljanju podatka na magistralu na
+  Odnosno Producer ne sme odlučivati o postavljanju podatka na magistrali na
   osnovu stanja Consumer-a.
 \item Može postojati kombinaciona putanja od Valid do Ready signala na strani
   Consumer-a.
@@ -133,17 +132,6 @@ Data linija u DTI interfejsu pored toga što može biti proizvoljne širine mož
 predstavljati i različite kompleksne tipove podataka.
 Ovim se omogućava bolja kompozicija modula, lakša manipulacija podacima,
 pregledniji izvorni kod.
-
-Neki od podržanih tipova su:
-\begin{itemize}
-\item \textbf{Uint[W]} \ref{uint_sec}
-\item \textbf{Int[W]} \ref{int_sec}
-\item \textbf{Tuple[T1, T2, ..., TN]} \ref{tuple_sec}
-\item \textbf{Array[T, N]} \ref{array_sec}
-\item \textbf{Queue[T, LVL]} \ref{queue_sec}
-\item \textbf{Union[T1, T2, ..., TN]} \ref{union_sec}
-\item \textbf{Unit} \ref{unit_sec}
-\end{itemize}
 
 \subsubsection{Uint} \label{uint_sec}
 \textbf{Uint[W]} predstavlja neoznačenu celobrojnu vrednost proizvoljne
@@ -163,39 +151,51 @@ Neki od podržanih tipova su:
 \subsubsection{Array} \label{array_sec}
 \textbf{Array[T, N]} predstavlja niz od N podataka tipa T.
 
+\subsubsection{Float}
+\textbf{Float} se koristi za predstavljanje decimalnih brojeva pomoću formata
+sa pokretnom tačkom.
+Ovaj tip se koristi isključivo za simulaciju i ne može se implementirati u hardveru.
+
+\subsubsection{Fixp}
+\textbf{Fixp[WI, W]} se koristi za predstavljanje decimalnih brojeva sa fiksnom tačkom. \\
+Format Fixed point tipa je \textbf{WI} širina celobrojnog dela i \textbf{W}
+ukupna širina magistrale, širina decimalnog dela je razlika ove dve širine. \\
+Ovaj tip se koristi za reprezentaciju decimalnih brojeva u hardveru.
+
 \subsubsection{Queue} \label{queue_sec}
 \textbf{Queue[T, LVL]} ili red predstavlja transakciju koja sadrži više
-  podataka proizvoljnog tipa T i informaciju o završetku transakcije EOT(end of
-  transaction).
-  Queue može biti proizvoljnog nivoa LVL. \\
-  Kao primer \textbf{Queue[Uint[4], 1](0, 1, 2, 3)} predstavlja red od četiri
-  četvorobitna podatka.
-  Rezultujuća Data magistrala biće širine 5 bita, 4 bita za podatak i 1 bit za EOT.
+podataka proizvoljnog tipa T i informaciju o završetku transakcije EOT(end of
+transaction).
+Queue može biti proizvoljnog nivoa LVL. \\
+Kao primer \textbf{Queue[Uint[4], 1](0, 1, 2, 3)} predstavlja red od četiri
+četvorobitna podatka, primer talasnih oblika na slici ispod.
+Rezultujuća Data magistrala biće širine 5 bita, 4 bita za podatak i 1 bit za EOT.
+
 \begin{figure}[H]
-\centering{
-  \scalebox{1.2}{
-    \input{images/tikz/pygears/queue1.tex}
-  }}
-\caption{Primer transakcije tipa}
-\label{queue_img1}
+  \centering{
+    \resizebox{0.6\textwidth}{!}{%
+      \input{images/tikz/pygears/queue1.tex}
+    }}
+  \caption{Primer transakcije tipa}
+  \label{queue_img1}
 \end{figure}
 
-Kao primer dvodimenzionalna matrica se može predstaviti kao Queue[Uint[4], 2],
+Dvodimenzionalna matrica se može predstaviti kao Queue[Uint[4], 2],
 odnosno red nivoa 2 sa proizvoljnim podatkom u ovom slučajem četvorobitnim
 neoznačnim brojem.
 
 \begin{figure}[H]
-\centering{
-  \scalebox{0.9}{
-    \input{images/tikz/pygears/queue_img.tex}
-  }}
-\caption{Matrice veličine 3x3}
+  \centering{
+    \resizebox{0.25\textwidth}{!}{%
+      \input{images/tikz/pygears/queue_img.tex}
+    }}
+\caption{Matrica veličine 3x3}
 \label{queue_matrix1}
 \end{figure}
 
 \begin{figure}[H]
 \centering{
-  \scalebox{1.2}{
+  \resizebox{.9\textwidth}{!}{%
     \input{images/tikz/pygears/queue2.tex}
   }}
 \caption{Transakcija matrice \ref{queue_matrix1}}
@@ -216,11 +216,11 @@ Konačno u taktu 9 oba EOT bita su na visokom nivou što označava poslednji pod
   Uz podatak prenosi se i informacija o aktivnom podatku na magistrali.
 
 \subsubsection{Unit} \label{unit_sec}
-\textbf{Unit} je tip koji ne prenosi podatak.
+\textbf{Unit} je tip koji prenosi ``prazan'' podatak.
 
 \begin{figure}[H]
 \centering{
-  \scalebox{1.2}{
+  \resizebox{.35\textwidth}{!}{%
     \input{images/tikz/pygears/unit.tex}
   }}
 \caption{Unit tip}
@@ -256,7 +256,7 @@ Parametar može biti bilo koji Python objekat i može imati inicijalnu vrednost 
 
 Jedan od mogućih načina implementacije Gear komponente je pisanje SystemVerilog
 opisa pa zatim Python wrapper-a za komponentu. \\
-Prilikom pisanja modula na ovaj način potrebno je pobrinuti se da dobijena
+Prilikom pisanja modula na ovaj način potrebno je pobrinuti se da napisana
 komponenta poštuje DTI protokol kao i da je ``čist'' Gear(\ref{gear_purity}). \\
 
 Prilikom pisanja wrapper-a za ovako implementiranu komponentu potrebno je
@@ -272,6 +272,8 @@ modula nije preporučen.
 Kako PyGears dolazi sa bibliotekom osnovnih funkcionalnih modula, većina
 potrebnih funkcionalnosti moguće je ostvariti njihovom kompozicijom. \\
 
+\newpage
+
 \subsubsection{Gear implementiram Python to HDL kompajlerom}
 
 Moguće je i pisati opis gear-a u Python-u pomoću HDL kompajlera. \\
@@ -283,47 +285,12 @@ izlazu daje jedan po jedan podatak ulaznog niza, odnosno serializuje podatke.
   serialize gear-a}, captionpos=b, label=serialize_example]{serialize.py}
 
 Kao primer možemo uzeti niz \textbf{Array[Uint[4], 3](3, 7, 9)} za očekivati je da će se
-na izlazu pojaviti podaci redom 3, 7 pa 9 što je prikazano na primeru \ref{serialize_example2}.
+na izlazu pojaviti podaci redom 3, 7 pa 9 što je prikazano na slici \ref{serialize_example2}.
 \begin{figure}[H]
 \centering{
-  \scalebox{1.2}{
+  \resizebox{.55\textwidth}{!}{%
     \input{images/tikz/pygears/serialize.tex}
   }}
 \caption{Serialize gear primer}
 \label{serialize_example2}
-\end{figure}
-
-\subsection{Python kao jezik za verifikaciju}
-
-Pored alata za pisanje opisa hardvera PyGears pruža mogućnost verifikacije i
-simulacije. \\
-Pomoću interfejsa sa besplatnim Verilator simulatorom i SystemVerilog DPI\cite{SV_DPI} interfejsom za
-komercijalne simulatore(Questa\cite{Questa}, NCSim\cite{NCSim}), moguće je
-pisanje verifikacionog okruženja u Python-u koje komunicira sa ovim
-simulatorima. \\
-
-Ovakvo verifikaciono okruženje ima prednosti u odnosu na SystemVerilog ili
-VHDL okruženje:
-\begin{itemize}
-
-\item Python je danas široko rasprostranjen i zajednica ima daleko više
-  korisnika nego SystemVerilog ili VHDL. Kao posledica toga dostupno je mnoštvo
-  paketa sa implementiranim algoritmima za većinu problema, tako da je pisanje
-  referentnih modela značajno olakšano korišćenjem gotovih biblioteka.
-
-\item Manipulacija kompleksnih tipova podataka je daleko lakša u Python-u od
-  VHDL-a i SystemVerilog-a, tako da je razvoj okruženja daleko brži.
-
-\item Verifikaciono okruženje se ne simulira zajedno sa HDL modelom time se
-  dobijaju bolje performanse verifikacije.
-
-\end{itemize}
-
-\begin{figure}[H]
-\centering{
-  \scalebox{1.0}{
-    \input{images/tikz/pygears/python_verilator.tex}
-  }}
-\caption{Python verifikaciono okruženje sa Verilatorom}
-\label{python_verif1}
 \end{figure}
