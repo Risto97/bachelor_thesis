@@ -1,6 +1,7 @@
 
 \usepackage[Serbian-Latn]{babel}
 
+\usepackage{pdfpages,caption}
 \usepackage{graphicx}
 \graphicspath{ {./images/} }
 \usepackage{subfig}
@@ -26,6 +27,17 @@
 
 \newcommand*{\Scale}[2][4]{\scalebox{#1}{$#2$}}%
 
+%%%% Sub sub sub section %%%%
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Title %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
 \newcommand{\titlePageCmd}{
@@ -95,7 +107,7 @@
   xleftmargin=\parindent,
   language=C,
   showstringspaces=false,
-  basicstyle=\normal\ttfamily,
+  basicstyle=\footnotesize\ttfamily,
   keywordstyle=\bfseries\color{green!40!black},
   commentstyle=\itshape\color{purple!40!black},
   identifierstyle=\color{blue},

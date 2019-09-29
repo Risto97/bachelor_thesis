@@ -29,14 +29,303 @@ internog DDR kontrolera.
 Preko ovog kontrolera pristup memoriji ima i PL sistem. \\
 Zynq SoC ima podršku GNU/Linux operativnog sistema.
 
+\newpage
+
 \subsection{Predloženi blok dijagram sistema}
 
+U nastavku je prikazan okviran blok dijagram povezivanja projektovanog IP jezgra
+sa procesorskim sistemom. \\
+Na slici su izostavljene interkonekcijske komponente, generatori reset i clk signala,
+memorijske konekcije itd... \\
 
 \begin{figure}[H]
   \centering
   \resizebox{1\textwidth}{!}{%
     \input{images/tikz/system.tex}
   }
-  \caption{Blok dijagram stddev modula.}
-  \label{stddev_bd}
+  \caption{Okviran blok dijagram sistema.}
+  \label{system_bd_approx}
 \end{figure}
+
+Blokovi obojeni crvenom bojom su projektovani u okviru ovog rada.
+Blokovi obojeni plavom bojom su standardne komponente i mogu se naći u okviru
+softverskog alata od proizvođača korišćenog SoC-a. \\
+
+Kako je već rečeno spoljni interfejsi \textbf{cascade\_classifier} IP jezgro su
+Streaming tipa.
+Streaming interfejsi nemaju informaciju o adresi, tako da sa njima nije
+moguće adresirati podatak iz DDR memorije preko DDR kontrolera. \\
+
+Komponente dm\_s2mm i dm\_mm2s su Data Mover-i, koji pretvaraju Streaming interfejs u \gls{mm}
+interfejse.
+Kako Streaming interfejs prenosi samo podatak i nema informaciju o
+adresi, potrebno je proslediti adresu i broj podataka preko posebnog komandnog
+interfejsa, na ovoj slici to su s2mm\_cfg i mm2s\_cfg.\\
+
+Glavno IP jezgro nema koristi od informacije sa koje adrese dolazi slika i na
+kojoj adresi se smeštaju rezultati, pa je zato za generisanje komande za Data Mover
+komponente zadužen dm\_cmd.\\
+Komponenta dm\_cmd od procesora dobija adresu bafera slike i rezultata iz eksterne DDR
+memorije i na osnovu toga generiše komande za Data Mover-e. \\
+Procesor adrese i broj podataka šalje preko apu\_cmd interfejsa. \\
+
+Nakon konfigurisanja Data Mover-a prvo će sa radom početi dm\_mm2s Data Mover,
+koji će poslati zahtev za sliku DDR kontroleru i pročitane podatke proslediti
+glavnom IP jezgru na obradu.
+Nakon popunjavanja IMG RAM memoriju unutar glavnog IP jezgra, jezgro počinje
+obradu slike. \\
+
+Ukoliko dođe do detekcije objekta na nekoj koordinati, ta koordinata će biti
+poslata preko dm\_s2mm Data Mover-a u određenu lokaciju za smeštanje rezultata u
+okviru eksterne DDR memorije. \\
+
+Nakon završetka obrade trenutne slike aktiviraće se irq signal koji označava
+interrupt za procesor.
+Glavno IP jezgro će držati aktivnim ovaj signal samo jedan takt, dok će se taj
+signal sačuvati u registru u okviru dm\_cmd jezgra i biće prosleđen na izlazni
+irq signal povezan sa procesorom. \\
+Nakon što procesor detektuje interrupt signal, to je znak procesoru da može da
+pripremi sledeću sliku.
+Nakon smeštanja naredne slike u bafer procesor treba da resetuje registrovani
+interrupt u okviru dm\_cmd jezgra, to radi slanjem komande preko apu\_cmd
+interfejsa. \\
+Nakon resetovanja interrupt signala, procesor ponovo šalje zahtev za obradu
+slike. \\
+
+Procesor pored slanja komande IP jezgru treba da preuzme sliku sa kamere ili
+učita iz fajla, zatim je konvertuje u grayscale reprezentaciju.
+Rezultate detekcije procesor može koristiti za željeni zadatak. \\
+
+\newpage
+
+\subsection{Implementirani sistem na Zynq SoC}
+
+U ovom radu sistem je implementiran na Zynq-7020 SoC.
+Korišćena je ZTurn\cite{zturn} ploča firme MYiR.
+Ova ploča se sastoji od Zynq-7020 čipa, 1GB eksterne DDR3 memorije, \gls{hdmi}
+kontroler i konektor, tasteri i \gls{led} za testiranje, g-senzor, temperaturni
+senzor, buzzer, flash memorija, SD card socket, Gig ethernet, JTAG, USB, CAN itd...
+Što se može videti na sledećoj slici. \\
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.65\linewidth]{images/zturn.jpg}
+  \caption{Zturn ploča\cite{zturn}}
+  \label{zturn_bd}
+\end{figure}
+
+
+
+Od eksternih periferija u ovom projektu korišćeni su SD kartica, Ethernet, HDMI,
+USB i DDR memorija.
+Procesor izvršava Arch Linux\cite{arch} operativni sistem, a komunikacija sa IP jezgrom je
+odrađena preko napisanog Linux Kernel Drivera i korisničke aplikacije. \\
+
+Na sledećoj strani prikazan je blok dijagram integratora implementiranog
+sistema. \\
+Može se primetiti da pored komentarisanih komponenti za povezivanje procesora sa
+IP jezgrom, na blok dijagramu se nalazi i Video kontroler pod nazivom
+hdmi\_core.
+Ovo jezgro se koristi za slanje sadržaja framebuffer-a Linux Kernel-a na
+eksterni HDMI kontroler, u cilju grafičkog interfejsa korisničke aplikacije. \\
+
+\includepdf[pages=-,pagecommand={},width=1.6\textwidth, height=1.2\textheight]{images/system_bd.pdf}
+
+
+\subsection{Rezultati implementacije sistema}
+
+\subsubsection{Sinteza i implementacija hardvera}
+FPGA čipovi se sastoje od velikog broja programabilnih primitivnih blokova i
+mreže za rutiranje.
+Ove blokove je potrebno konfigurisati i međusobno ih povezati kako bi se dobila
+željena funkcionalnost.
+Kako se tipični dizajnovi koji ciljaju FPGA čipove sastoje od desetina hiljada
+LUT-ova i ostalih komponenti, ovaj korak nije moguće odraditi ručno.
+Sintezu i implementaciju digitalnog hardvera je jedino moguće uraditi pomoću
+automatskog alata. \\
+
+Proizvođači FPGA čipova uglavnom imaju svoj softverski alat za obavljanje ove
+radnje.
+Tako u slučaju Xilinx FPGA čipova potrebno je koristiti Vivado.\\
+
+Prilikom sinteze hardvera alat hijerarhijski struktruirane HDL modele izravna i
+napravi model sa istom hijerarhijom sačuvan u formatu netliste.
+Tokom sinteze se rade i razne optimizacije poput deljenja funkcionalnih resursa,
+logička minimizacija, optimizacija mašina stanja itd...
+Konačno alat za sintezu može mapirati komponente generisane netliste u
+primitivne blokove ciljane FPGA arhitekture, tzv Technology Mapping. \\
+Nakon koraka sinteze moguće je proceniti koliko će se hardverskih primitivnih
+blokova koristiti u konačnoj hardverskoj implementaciji. \\
+Na osnovu toga se može zaključiti da li implementirani hardver zadovoljava
+ograničenja potrošnje resursa. \\
+
+Nakon sinteze hardvera potrebno je odraditi Place and Route komponenti na
+željenom FPGA čipu.
+To je takođe moguće odraditi automatskim alatom.
+Nakon ovog koraka moguća je procena vremenskih karakteristika implementiranog
+hardvera.
+Pošto su poznata kašnjenja primitivnih blokova i moguća je estimacija kašnjenja
+mreže za rutiranje može se proceniti da li će dizajn zadovoljavati vremenska
+ograničenja. \\
+Takođe moguće je proceniti i potrošnju konačne implementacije. \\
+
+Pored zvaničnih alata za sintezu i implementaciju digitalnog hardvera na FPGA
+čipovima, postoje i alternativna Open Source rešenja.
+Problem sinteze rešava alat pod nazivom yosys\cite{yosys}, ovaj alat je brži od
+zvaničnih alata za sintezu, uz to u nekim slučajevima generiše optimalniji
+hardver, dok je manje efikasan u mapiranju hardvera na tehnologiju. \\
+Za Place and Route može se koristiti nextpnr\cite{nextpnr}.
+Pored toga postoji projekat SymbiFlow\cite{symbiflow} koji nastoji da poveže sve
+ove alate i obezbedi jedinstveni alat za implementaciju digitalnog hardvera na
+FPGA čipove nezavisno od proizvođača.
+Veliki problem u ovom projektu predstavlja što FPGA proizvođači ne objavljuju
+javno arhitekturu čipova i format Bitstream-a, pa se do ovih informacija mora
+doći reverznim inženjeringom. \\
+
+\newpage
+
+\subsubsection{Analiza potrošnje hardverskih resursa}
+
+U narednoj tabeli biće prikazano zauzeće hardverskih resursa u slučaju PyGears
+implementacije.
+Biće prikazana potrošnja samo glavnog IP jezgra i ukupnog sistema. \\
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{center}
+  \centering
+  \begin{tabular}{| P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} |}
+    \hline
+    Name  & LUT & FF & BRAM & DSP  \\ \hline
+    Total & 14,259 (27\%) & 14,033 (13\%) & 47.5 (34\%) & 7 (3\%)  \\ \hline
+    Cascade Classifier & 6,216 (12\%) & 2,252 (2\%) & 35 (25\%) & 7 (3\%) \\ \hline
+  \end{tabular}
+  \captionof{table}{Hardverski resursi nakon sinteze}
+\end{center}
+
+Nakon implementacije dobijaju se oko 10\% niže brojke za LUT i FF komponente. \\
+Kao što se može videti najkritičniji deo ovog IP jezgra je broj korišćenih BRAM
+komponenti što je bilo i očekivano na osnovu analize predložene arhitekture. \\
+Može se videti da je projektovano jezgro veoma efikasno u pogledu ostalih
+hardverskih resursa i ostaje prostora za ubrzanje dodavanjem hardverskih
+resursa, odnosno paralelizma.
+
+\subsubsection{Analiza vremenskog izveštaja i Timing Closure}
+
+Frekvencija takta je bitna stavka, što većom frekvencijom taktujemo IP jezgro
+brzina obrade slike će biti brža.
+Naravno postoji ograničenje maksimalne frekvencije koja se može postići.
+Ovo ograničenje postoji zbog kašnjenja logičkih blokova i mreže za rutiranje unutar FPGA čipa.
+Izlazni signali flip flopova prolaze kroz kombinacionu logiku i dolaze do ulaza
+sledećeg flip flopa, kašnjenje ove putanje mora biti kraće od periode takta uz
+dodatan uticaj Setup i Hold vremena flip flopova.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.55\linewidth]{images/comb.png}
+  \caption{Kašnjenje kombinacione logike}
+  \label{comb_logic}
+\end{figure}
+
+Mreža kombinacione logike predstavljena oblačićem može imati značajno vreme
+propagacije.
+Jedan od načina da se vreme propagacije smanji je ubacivanjem registara unutar
+kombinacione mreže. \\
+To je ujedno i najčešća tehnika ubrzavanja dizajna u krajnjoj fazi i
+zadovoljavanja vremenskih ograničenja dizajna, takozvani Timing Closure. \\
+
+\newpage
+
+Nakon podešavanja takta na 47MHz i pokretanja implementacije može se videti da
+su vremena zadovoljena za odabrani takt. \\
+Empirijski se može zaključiti da frekvencija sistema srednje veličine
+implementiranog na Zynq-7020 čipu može dostići brzine do oko 110MHz, na osnovu
+čega možemo zaključiti da se u ovom slučaju mogu postići bolji
+rezultati. \\
+Na slici ispod su prikazane najkritičnije putanje u okviru dizajna. \\
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{results/implementation/pygears_slow/timing.png}
+  \caption{Vremenski izveštaj pre skraćivanja kombinacionih putanja}
+  \label{slow_time}
+\end{figure}
+
+Takođe može se i primetiti da je Logic Delay koji predstavlja vreme propagacije
+kroz kombinacionu logiku veće od Net Delay-a koji predstavlja vreme
+propagacije kroz mrežu za rutiranje.
+Na Net Delay se ne može mnogo uticati i uveliko zavisi od kvaliteta korišćenog
+FPGA čipa. \\
+
+Može se primetiti veliko odstupanje između prvih desetak najkritičnijih putanja,
+kao i da su putanje koje imaju Logic Delay od približno 13ns grupisane u okviru
+jednog interfejsa.
+To je znak da postoje putanje koje imaju značajno duže vreme propagacije od
+ostatka sistema, pa je njih potrebno ubrzati. \\
+Pomoću Vivado alata moguće je identifikovati putanju propagacije kritičnih
+putanja i odlučiti gde bi se kombinaciona putanja mogla prekinuti i ubaciti
+registar.
+Ovo je dugotrajan proces i mora se raditi iz više iteracija, nakon svakog
+ubacivanja registara mora se verifikovati funkcionalna ispravnost sistema, zatim
+se ponovo pokreće implementacija. \\
+U svakoj narednoj iteraciji sve je teže uočiti kritične putanje. \\
+
+\newpage
+
+PyGears dodatno olakšava proces skraćivanja kombinacionih putanja jednostavnim
+ubacivanjem registara u dizajn što je prikazano na sledećem primeru. \\
+
+\lstinputlisting[language=Python, mathescape, caption={PyGears implementacija
+  stddev komponente}, captionpos=t, label=stddev_pygears]{examples/speedup.py}
+
+U kodnom segmentu iznad u liniji 5 importuje se gear dreg koji predstavlja
+registar i lokalno se naziva dreg\_sp.
+Ovo može biti koristan detalj jer pomaže u boljoj distinkciji između registara
+koji su prisutni funkcionalno i onih koji su ubačeni radi skraćivanja
+kombinacionih putanja. \\
+U linijama 12 i 15 može se videti skraćivanja kombinacione putanje posle
+frame\_sum gear-a ubacivanje dreg\_sp gear-a. \\
+
+Dodatna prednost PyGears-a u ovoj situaciji je činjenica da se ubacivanjem
+registara unutar dizajna ne može izgubiti funkcionalna korektnost sistema.
+Iako se ne može izgubiti funkcionalna korektnost, nasumičnim ubacivanjem
+registara se može pogoršati vremenske performanse.
+Prilikom ubacivanja registara može doći do gubljenja balansa između dve
+paralelne grane, pa će jedan podatak uvek kasniti jedan takt do sinhronizacionog
+gear-a u odnosu na drugu granu, usled čega će se na izlazu sinhronizacionog
+gear-a pojaviti neželjeni takt pauze.
+Pažljivom analizom paralelnih grana i sinhronizacionih tačaka, moguće je
+balansirati grane dodavanjem dodatnog registra u nebalansiranoj grani. \\
+
+\newpage
+
+Konačno nakon skraćivanja kombinacionih putanja dostignuta je frekvencija takta
+od 100MHz.\\
+Pored skraćivanja kombinacionih putanja dodatno je uključena i
+Performance ExplorePostRoutePhysOpt strategija za implementaciju u okviru
+Vivado alat, ova strategija će učiniti da vreme implementacije traje duže, ali
+će se kao rezultat dobiti implementacija sa boljim vremenskim karakteristikama,
+ponekad sa cenom dodatnih hardverskih resursa. \\
+
+Kao što se može videti dostignuto je više nego duplo ubrzanje sistema ovom tehnikom. \\
+Treba napomenuti da je u RTL metodologiji preporučljivo voditi računa o
+kombinacionim putanjama u ranijim fazama implementacije, dok je zbog lakog
+ubacivanja registara u kasnijim fazama dizajna u PyGears metodologiji
+pogodniji ovakav pristup. \\
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1\linewidth]{results/implementation/pygears_fast/timing.png}
+  \caption{Vremenski izveštaj posle skraćivanja kombinacionih putanja}
+  \label{slow_time}
+\end{figure}
+
+I kao što se može videti dostignuto je ogromno skraćenje Logic Delay vremena, a
+može se i primetiti da je i Net Delay značajno skraćen to je verovatno rezultat
+lakšeg zadatka za Place and Route alat nakon ubacivanja registara. \\
+Na slici je prikazano 10 kombinacionih putanja u prošlom slučaju smo primetili
+veliku razliku ukupnog kašnjenja u istom broju putanja, u ovom slučaju ne bismo
+primetili veliku razliku u totalnom kašnjenju čak i kod prvih 100 kritičnih
+putanja, to je pokazatelj da se dolazi do granica mogućnosti ubrzavanja sistema
+ovim pristupom. \\
+U tom trenutku dolazimo do Timing Closure-a, kada smo zadovoljni sa vremenskim
+karakteristikama sistema. \\
