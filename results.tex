@@ -1,0 +1,52 @@
+\section{Poređenje performansi}
+
+Performanse projektovanog IP jezgra biće upoređene sa softverskim
+implementacijama.
+Porediće se C++ specifikacija napisana u ovom radu, OpenCV implementacija i
+hardverska implementacija. \\
+Mereno je samo vreme izvršavanja detekcije, odnosno isti zadatak koji obavlja IP
+jezgro obalja i softver. \\
+OpenCV implementacija biće poređena sa automatskim skaliranjem slike i sa
+fiksnim faktorom skaliranja korišćenim u hardverskoj implementaciji. \\
+
+Poređene platforme su Ryzen 5 1600 procesor pod Arch Linux-om, Thinkpad T430s
+i5-3210m pod Arch Linux-om i Zynq 7020 pod Arch Linux ARM-om. \\
+
+U sledećoj tabeli je prikazano prosečno vreme detekcije na Caltech dataset-u
+slika veličine 240x320. \\
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{center}
+  \centering
+  \captionof{table}{Poređenje performansi}
+  \begin{tabular}{| P{2cm} | P{2.5cm} | P{2.5cm} | P{2.5cm} | P{2.5cm} |}
+    \hline
+    Platform & OpenCV Scaling Auto & OpenCV Scaling Fixed & C++ Spec & IP Core \\ \hline
+    Zynq & 571 ms & 205 ms & 3593 ms & 926 ms \\ \hline
+    Thinkpad & 28 ms & 10.3 ms & 194 ms & N/A \\ \hline
+    Ryzen & 22.8 ms & 9.7 ms & 192 ms & N/A \\ \hline
+  \end{tabular}
+\end{center}
+
+Kao što je bilo i očekivano OpenCV implementacija pod Ryzen procesorom ima
+najkraće vreme izvršavanja.
+Može se videti da iako Ryzen procesor ima 6 bržih CPU jezgara za razliku od 2 kod
+Thinkpad laptopa ne postoje drastične razlike u vremenu izvršavanja softverskih
+implementacija. \\
+Zynq je očekivano najsporiji od tri platforme.
+Projektovano IP jezgro je 4.5 puta sporije od OpenCV implementacije na istoj
+platformi. \\
+
+Iako su performanse IP jezgra slabije od OpenCV implementacije treba uzeti u
+obzir i odnos frekvencija procesora i IP jezgra.
+Zynq 7020 se sastoji od dva Cortex-A9 procesora taktovana sa 866MHz, što znači 8.5
+puta veća frekvencija takta od IP jezgra.
+Pored toga projektovano IP jezgro zauzima samo oko 15\% hardverskih resursa Zynq
+čipa, što znači da postoji prostora za ubrzanjem paralelizmom. \\
+
+Prednost FPGA implementacije leži i u tome što je procesor značajno
+manje opterećen prilikom detekcije, pa je procesor slobodan da radi ostale
+zadatke u paraleli.
+Pošto IP jezgra zauzimaju malo hardverskih resursa, postoji mogućnost
+instancioniranja više IP jezgra u sistemu i paralelne detekcije više slika
+istovremeno, pritom bez gubitaka performansi usled paralelizma. \\

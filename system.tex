@@ -193,13 +193,13 @@ Biće prikazana potrošnja samo glavnog IP jezgra i ukupnog sistema. \\
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
+  \captionof{table}{Hardverski resursi nakon sinteze}
   \begin{tabular}{| P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} |}
     \hline
     Name  & LUT & FF & BRAM & DSP  \\ \hline
     Total & 14,259 (27\%) & 14,033 (13\%) & 47.5 (34\%) & 7 (3\%)  \\ \hline
     Cascade Classifier & 6,216 (12\%) & 2,252 (2\%) & 35 (25\%) & 7 (3\%) \\ \hline
   \end{tabular}
-  \captionof{table}{Hardverski resursi nakon sinteze}
 \end{center}
 
 Nakon implementacije dobijaju se oko 10\% niže brojke za LUT i FF komponente. \\
@@ -319,8 +319,8 @@ pogodniji ovakav pristup. \\
   \label{slow_time}
 \end{figure}
 
-I kao što se može videti dostignuto je ogromno skraćenje Logic Delay vremena, a
-može se i primetiti da je i Net Delay značajno skraćen to je verovatno rezultat
+Može se primetiti da je dostignuto ogromno skraćenje Logic Delay vremena, a
+može se  primetiti i da je Net Delay značajno skraćen to je verovatno rezultat
 lakšeg zadatka za Place and Route alat nakon ubacivanja registara. \\
 Na slici je prikazano 10 kombinacionih putanja u prošlom slučaju smo primetili
 veliku razliku ukupnog kašnjenja u istom broju putanja, u ovom slučaju ne bismo
@@ -329,3 +329,72 @@ putanja, to je pokazatelj da se dolazi do granica mogućnosti ubrzavanja sistema
 ovim pristupom. \\
 U tom trenutku dolazimo do Timing Closure-a, kada smo zadovoljni sa vremenskim
 karakteristikama sistema. \\
+
+\subsection{Softver procesora}
+
+Nakon što je isprojektovan i implementiran sistem, potrebno je napisati
+softver za procesor koji će konfigurisati IP jezgro i koristiti rezultate detekcije.
+Ovde postoji izbor da li će procesor izvršavati operativni sistem ili će izvršavati
+Bare Metal aplikaciju. \\
+
+Prednosti Bare Metal aplikacije je veća pouzdanost, jednostavnost i bolje performanse zbog
+nepostojanja schedule-inga. \\
+Prednosti operativnog sistema je brži i lakši razvoj aplikacije, nezavisnost
+aplikacije od platforme, laka implementacija korisničkog interfejsa,
+lak pristup internetu itd...\\
+
+U ovom radu je odlučeno da procesor radi na GNU/Linux operativnom sistemu. \\
+Softver je particionisa na sledeći način:
+
+\begin{figure}[H]
+  \centering
+  \resizebox{0.9\textwidth}{!}{%
+    \input{images/tikz/software_stack.tex}
+  }
+  \caption{Softverski stek.}
+  \label{software_stack}
+\end{figure}
+
+Kernel Device driver šalje komande dm\_cmd komponenti preko AXI Lite interfejsa.
+Komunikacija između drajvera i AXI Lite komponente se obavlja preko memorijskog
+mapiranja.
+Registri unutar dm\_cmd komponente su mapirani na određenu memorijsku lokaciju u
+okviru adresnog prostora procesora.
+Procesor može pristupati ovim registrima prostim upisivanjem na adresi mapiranih registara.\\
+Pored toga interrupt signal koji označava kraj obrade slike se obrađuje unutar
+Kernel drajvera. \\
+Kernel drajver ima implementirane sledeće operacije:
+\begin {itemize}
+  \item \textbf{Write} operacija startuje IP jezgro upisivanjem potrebnih adresa
+    u dm\_cmd komponentu i postavlja bit za start na jedinicu. \\
+  \item \textbf{Read} operacija vraća sadržaj bafera za rezultate korisničkoj
+    aplikaciji. \\
+  \item \textbf{Mmap} operacija memorijski mapira bafer slike iz korisničke
+    aplikacije na fizički kontinualni memorijski bafer unutar kernel prostora.
+    Fizičku adresu kontinualnog memorijskog bafera je potrebno poslati dm\_cmd
+    komponenti unutar Write operacije.\\
+\end{itemize}
+
+Prilikom završetka obrade slike poslaće se zahtev za interapt procesoru,
+taj zahtev će se obraditi u okviru Kernel drajvera.
+Nakon pojave interapta poslaće se komanda za resetovanje interapt registra u
+okviru dm\_cmd komponente, zatim će se otključati
+read\_mutex kako bi se omogućila operacija Read. \\
+
+Korisnička aplikacija je podeljena u dva nivoa.
+Niži nivo aplikacije predstavlja C funkciju koja je zadužena za komunikaciju sa
+kernel drajverom.
+Ova funkcija obavlja operacije čitanja rezultata i memorijskog mapiranja prosleđene slike na
+kernel memorijski bafer.
+Funkciju je moguće kompajlirati kao \gls{so} biblioteku tako da je moguć pristup
+iz Python-a preko ctypes biblioteke, kao i pristup iz C++-a. \\
+
+Viši nivoi korisničke aplikacije mogu biti napisani u programskim jezicima višeg
+nivoa.
+U ovom radu je napisana aplikaciju u Python jeziku.
+Prednost korišćenja jezika kao što je Python je jednostavno korišćenje
+biblioteka poput OpenCV-a.
+Pomoću OpenCV biblioteke može se na lak način pročitati slika iz fajla ili
+preuzeti frejm sa kamere, zatim pretvoriti u grayscale reprezentaciju. \\
+Takođe kao vizualizaciju rada IP jezgra u okviru OpenCV biblioteke može se na
+lak način nacrtati pravougaonici na pozicijama detektovanih objekata. \\

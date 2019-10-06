@@ -1,0 +1,69 @@
+\pgfdeclarelayer{background1}
+\pgfdeclarelayer{background2}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background1, background2,main,foreground}
+
+\tikzstyle{cloud1} = [draw=black, thick, fill=purple!20, minimum height = 1em]
+\tikzstyle{block_l} =[draw, text centered, fill=blue!15, minimum width=2.5cm, minimum height=1.5cm]
+\tikzstyle{block_m} =[draw, text centered, fill=blue!15, minimum width=2.0cm, text width=2.0cm, minimum height=1.0cm]
+\tikzstyle{block_s} =[draw, text centered, fill=blue!15, minimum width=2cm, minimum height=1.5cm]
+\tikzstyle{line} = [draw, arrows={-Triangle[length=0.2cm]}]
+
+\tikzset{
+  multiplexer/.style={
+    draw,
+    trapezium,
+    fill=blue!15,
+    shape border uses incircle,
+    shape border rotate=180,
+    minimum size=25pt
+  }
+}
+
+\begin{tikzpicture}[thick]
+
+  \node [block_m] (c_user) {User C};
+  \node[coordinate, above = 0cm of c_user] (c_in);
+  \node[coordinate, above = 0.5cm of c_in] (c_in1);
+  \node[coordinate, below left = 0cm and -0.5cm of c_user] (c_write);
+  \node[coordinate, below = 0cm of c_user] (c_read);
+  \node[coordinate, below right = 0cm and -0.5cm of c_user] (c_mmap);
+
+  \node [block_m, above left = 1cm and 0.25cm of c_user] (python) {Python};
+  \node[coordinate, below = 0cm of python] (python_out);
+  \node[coordinate, below = 0.5cm of python] (python_out1);
+
+  \node [block_m, above right = 1cm and 0.25 of c_user] (cpp) {C++};
+  \node[coordinate, below = 0cm of cpp] (cpp_out);
+  \node[coordinate, below = 0.5cm of cpp] (cpp_out1);
+
+  \node [block_l, fill=red!20, below = 1.5cm of c_user] (drv) {Device Driver};
+  \node[coordinate, above left = 0cm and -0.5cm of drv] (drv_write);
+  \node[coordinate, above = 0cm of drv] (drv_read);
+  \node[coordinate, above right = 0cm and -0.5cm of drv] (drv_mmap);
+  \node[coordinate, below = 0cm of drv] (drv_out);
+
+  \node[coordinate, below left = 0.5cm and 4cm of c_user] (dot_start);
+  \node[coordinate, below right = 0.5cm and 4cm of c_user] (dot_end);
+
+  \draw [dashed] (dot_start) node[transition, yshift=-.3cm, xshift=+1.6cm]{Kernel Space} node[transition, yshift=0.3cm, xshift=+1.6cm]{User Space} -- (dot_end);
+
+
+  \node[coordinate, below left = 0.5cm and 4cm of drv] (hw_dot_start);
+  \node[coordinate, below right = 0.5cm and 4cm of drv] (hw_dot_end);
+
+  \draw [dashed] (hw_dot_start) node[transition, yshift=-.3cm, xshift=+1.6cm]{FPGA} -- (hw_dot_end);
+
+  % paths
+  \path [line, very thick] (python_out) -- (python_out1) -| (c_in1) -- (c_in);
+  \path [line, very thick] (cpp_out) -- (cpp_out1) -| (c_in1) -- (c_in);
+
+  \path [line, very thick] (c_write) -- (drv_write);
+  \path [line, very thick] (drv_read) -- (c_read);
+  \path [line, very thick] (c_mmap) -- (drv_mmap);
+
+  \path [line, very thick] (drv_out) -- +(0, -1.5cm);
+  \path [line, very thick] (drv_out) -- +(0, -1.5cm) -- (drv_out);
+  % \path [line, very thick] (w_sum_in) node[transition, yshift=+0.3cm, xshift=0.6cm] {\textbf{weight\_data}}  node[transition, yshift=-0.3cm, xshift=-0.0cm] {\textbf{fb\_ii}}  -- (w_sum1_in_port);
+
+\end{tikzpicture}

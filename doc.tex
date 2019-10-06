@@ -1,7 +1,6 @@
 \documentclass[12pt, fleqn]{article}
 \usepackage[serbian]{babel}
 
-
 % \usepackage{thesis}
 % \newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
 
@@ -14,12 +13,12 @@
 \usepackage{amsmath}
 \usepackage{bytefield}
 \usepackage{register}
-\newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
-% \newcommand{\subjectName}{Projekat iz predmeta Projektovanje elektronskih uređaja na sistemskom nivou}
+% \newcommand{\thesisName}{Hardverska implementacija Viola-Jones algoritma}
+% % \newcommand{\subjectName}{Projekat iz predmeta Projektovanje elektronskih uređaja na sistemskom nivou}
 
-\author{Risto Pejašinović EE19/2015}
-\newcommand{\mentor}{}
-\date{septembar 2019}
+% \author{Risto Pejašinović EE19/2015}
+% \newcommand{\mentor}{}
+% \date{septembar 2019}
 
 % \selectcolormodel{gray}
 \begin{document}
@@ -28,14 +27,27 @@
 \counterwithin{figure}{section}
 \counterwithin{equation}{section}
 \counterwithin{table}{section}
+% \titlePageCmd
+\pagenumbering{}
 
-\titlePageCmd
+% \includepdf[pages={0,1},pagecommand={}]{template.pdf}
+\includepdf[pages={1,2},pagecommand={}]{template.pdf}
+\pagenumbering{arabic}
+\setcounter{page}{3}
+\includepdf[pages={3,4},pagecommand={}]{template.pdf}
 \noindent
 
-\thispagestyle{empty}
-\newpage
+% \thispagestyle{empty}
+% \newpage
 
 \tableofcontents
+
+\newpage
+\listoffigures
+
+\newpage
+\listoftables
+
 \newpage
 \input{glossary.tex}
 \newpage
@@ -53,6 +65,9 @@
 \newpage
 
 \input{system.tex}
+
+\newpage
+\input{results.tex}
 
 \newpage
 

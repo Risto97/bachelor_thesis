@@ -1,0 +1,460 @@
+\documentclass{beamer}
+\usepackage[serbian]{babel}
+\usepackage[Serbian-Latn]{babel}
+
+\setbeamersize{text margin left=5mm,text margin right=5mm}
+
+%% tikz block diagrams %%
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning,shapes.geometric}
+\usetikzlibrary{fit}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{automata}
+
+\usepackage[utf8]{inputenc}
+\usetheme{Antibes}
+% \usetheme{Berkeley}
+% \usetheme{JuanLesPins}
+% \usetheme{Warsaw}
+\usepackage[]{graphicx}
+
+
+\title[] %optional
+{Hardverska implementacija Viola-Jones algoritma}
+
+\subtitle{Diplomski rad}
+
+\author[Risto Pejašinović]
+{Risto Pejašinović}
+
+\institute[FTN] % % (optional)
+{
+  Fakultet Tehničkih Nauka,
+  Univerzitet u Novom Sadu
+}
+
+\date[Oktobar 2019] % (optional)
+{Oktobar 2019}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}
+  \frametitle{Sadržaj}
+  \tableofcontents
+\end{frame}
+
+\section{Viola-Jones}
+
+\subsection{Uvod}
+\begin{frame}
+  \frametitle{Viola-Jones Algoritam}
+  Algoritam za detekciju objekata na slici.
+  \begin{itemize}
+  \item Paul Viola, Michael Jones 2001.
+  \item<1-> Najčešće korišćen za detekciju lica.
+  \item<1-> Mobilni telefoni, digitalni fotoaparati.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Viola-Jones Algoritam}
+  Tri ključne stvari.
+  \begin{itemize}
+  \item<1-> Integralna slika.
+  \item<1-> AdaBoost.
+  \item<1-> Kaskadni Klasifikator.
+  \end{itemize}
+\end{frame}
+
+\subsection{Integralna slika}
+% \begin{frame}
+%   \frametitle{Integralna slika}
+%   \begin{itemize}
+%   \item<1-> Zaslužna za brzinu.
+%   \item<1-> Jednostavna transformacija.
+%   \item<1-> Računanje bilo koje površine u konstantnom vremenu.
+%   \end{itemize}
+% \end{frame}
+
+\begin{frame}
+  \frametitle{Integralna slika}
+  Piksel integralne slike predstavlja zbir svih piksela koji se nalaze gore i levo
+  na originalnoj slici.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\linewidth]{../images/integral_image1}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Integralna slika}
+  Računanje bilo koje površine u konstantnom vremenu. \\
+  2 oduzimanja i jedno sabiranje.
+  Potrebne samo ivice.
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.55\linewidth]{../images/integral_image2}
+  \end{figure}
+\end{frame}
+
+\subsection{HAAR obležja}
+\begin{frame}{HAAR obeležja}
+    \begin{columns}[onlytextwidth,T]
+      \column{\dimexpr\linewidth-50mm-0mm}
+
+      \begin{itemize}
+      \item<1-> Ciljaju karakteristike objekta
+      \item<1-> Pravougaona obeležja.
+      \item<1-> 2 ili 3 pravougaonika i težina.
+      \item<1-> Tipične dimenzije prozora 24x24.
+      \item<1-> Oko 160,000 mogućih obeležja.
+      \end{itemize}
+
+      \column{60mm}
+
+      \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\linewidth]{../images/haar_features1}
+      \end{figure}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+  \frametitle{HAAR obeležja, Ciljaju karakteristike objekta}
+  Čelo svetlije od očiju. \\
+  Nos svetliji od očiju. \\
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{../images/haar_features2}
+  \end{figure}
+\end{frame}
+
+
+\subsection{Ada Boost}
+\begin{frame}
+  \frametitle{Ada Boost}
+
+  \begin{itemize}
+  \item<1-> Mašinsko učenje.
+  \item<1-> 160,000 obeležja.
+  \item<1-> Ponavljaju se, nisu sva korisna.
+  \item<1-> Weak Learner 50\% +
+  \item<1-> Kombinacijom Strong Classifier
+  \end{itemize}
+
+\end{frame}
+
+\subsection{Kaskadni Klasifikator}
+\begin{frame}
+  \frametitle{Kaskadni Klasifikator}
+
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-60mm-2mm}
+  \begin{itemize}
+  \item<1-> 2913 obeležja u modelu.
+  \item<1-> Veliki deo slike pozadina.
+  \item<2-> Ranije odbacivanje pozadine.
+  \item<2-> 2913 klasifikatora u 25 etapa.
+  \item<3-> Posle pete etape odbačeno 99\%.
+  \end{itemize}
+
+
+  \column{80mm}
+  \begin{overprint}
+    \onslide<1>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
+    \onslide<2>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier1}
+    \onslide<3>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier2}
+  \end{overprint}
+
+  \end{columns}
+\end{frame}
+
+\subsection{Skaliranje slike}
+\begin{frame}
+  \frametitle{Skaliranje slike}
+
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-60mm-2mm}
+    \begin{itemize}
+    \item<1-> Objekti različite veličine.
+    \item<2-> Piramida skaliranih slika.
+    \end{itemize}
+
+
+    \column{80mm}
+    \begin{overprint}
+      \onslide<1>\includegraphics[width=0.83\linewidth]{../images/sixfaces_scaled_res}
+      \onslide<2>\includegraphics[width=0.7\linewidth]{../images/image_pyramid}
+    \end{overprint}
+
+  \end{columns}
+\end{frame}
+
+\subsection{Osetljivost na osvetljaj i rotaciju}
+\begin{frame}
+  \frametitle{Osetljivost na osvetljaj i rotaciju}
+
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-50mm-2mm}
+    \begin{itemize}
+    \item<1-> Osetljiv na osvetljaj.
+    \item<2-> I na rotaciju.
+    \end{itemize}
+
+
+    \column{80mm}
+    \begin{overprint}
+      \onslide<1>\includegraphics[width=0.7\linewidth]{../images/overexposed_light}
+      \onslide<2>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
+      \onslide<3>\includegraphics[width=0.7\linewidth]{../images/rotated_res}
+    \end{overprint}
+
+  \end{columns}
+\end{frame}
+
+
+\section{OpenCV}
+\begin{frame}
+  \frametitle{OpenCV}
+
+  \begin{itemize}
+  \item<1-> Istrenirani modeli (.xml fajl).
+  \item<1-> Alat za treniranje.
+  \item<1-> Implementacija klasifikatora.
+  % \item<1-> Treba parsirati .xml fajl.
+  % \item<1-> haarcascaade\_frontalface\_default.xml
+  % \item<1-> Python za parsiranje.
+  \end{itemize}
+
+\end{frame}
+
+\section{Specifikacije za izvršavanje}
+\begin{frame}
+  \frametitle{Specifikacije za izvršavanje}
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-55mm-2mm}
+    \begin{itemize}
+    \item<1-> Python XML parser.
+    \item<1-> Python klasa klasifikatora.
+    \item<1-> Python klasifikator.
+    \item<1-> C++ Header model fajl.
+    \item<1-> C++ klasifikator.
+    \end{itemize}
+
+    \column{80mm}
+    \begin{overprint}
+      \onslide<1>\includegraphics[width=0.77\linewidth]{../images/bdp/sw_arch/sw_arch1}
+    \end{overprint}
+
+  \end{columns}
+
+\end{frame}
+
+
+\section{Arhitektura hardvera}
+
+\begin{frame}
+  \frametitle{Arhitektura hardvera}
+  \begin{figure}[H]
+    \centering{
+      \resizebox{1.00\textwidth}{!}{%
+        \input{../images/tikz/hw_arch.tex}
+      }}
+  \end{figure}
+\end{frame}
+
+\begin{frame}
+   \frametitle<1->{Interfejsi}
+   \frametitle<2->{IMG RAM}
+
+  \begin{itemize}
+  \item<1-1> \textbf{img\_in} ulazna slika.
+  \item<1-1> \textbf{detect\_addr} detektovane koordinate.
+  \item<1-1> \textbf{irq} interapt signal, zavšetak slike.
+
+  \item<2-2> RAM memorija, za skladištenje slike.
+  \item<2-2> Ušteda pristupa eksternoj memoriji.
+  \end{itemize}
+
+  \begin{figure}[H]
+    \centering{
+      \resizebox{.87\textwidth}{!}{%
+        \input{../images/tikz/hw_arch.tex}
+      }}
+  \end{figure}
+\end{frame}
+
+\subsection{rd\_addrgen}
+
+\begin{frame}
+  \frametitle<1->{rd\_addrgen}
+
+  \begin{itemize}
+  \item<1-2> Generiše adrese za čitanje iz IMG RAM.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \centering
+    \resizebox{1.1\textwidth}{!}{%
+      \centering{
+      \begin{overprint}
+        \onslide<1>\input{../images/tikz/hop_sweep/hop_sweep1.tex}
+        \onslide<2>\input{../images/tikz/hop_sweep/hop_sweep3.tex}
+      \end{overprint}
+      \begin{overprint}
+        \onslide<1>\input{../images/tikz/hop_sweep/hop_sweep2.tex}
+        \onslide<2>\input{../images/tikz/hop_sweep/hop_sweep4.tex}
+      \end{overprint}
+    }
+  }
+  \end{figure}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle<1->{rd\_addrgen}
+
+  \begin{itemize}
+  \item<1-> Hopper, sweeper.
+  \item<1-> Skaliranje, granice.
+  \item<1-> Transliranje adrese.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \centering
+    \resizebox{0.8\textwidth}{!}{%
+         \input{../images/tikz/rd_addrgen.tex}
+    }
+  \end{figure}
+
+\end{frame}
+
+\subsection{Generator integralne slike}
+
+\begin{frame}
+  \frametitle<1-1>{ii\_gen}
+  \frametitle<2-2>{sii\_gen}
+
+  \begin{itemize}
+  \item<1-1> Sekvencijalni generator integralne slike.
+  \item<2-2> Za računanje stanadardne devijacije.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.6\textwidth}{!}{%
+      \begin{overprint}
+          \onslide<1>\input{../images/tikz/ii_gen.tex}
+          \onslide<2>\input{../images/tikz/sii_gen.tex}
+    \end{overprint}
+    }
+  \end{figure}
+
+\end{frame}
+
+\subsection{Frame Buffer}
+
+\begin{frame}
+  \frametitle<1-1>{frame\_buffer}
+
+  \begin{itemize}
+  \item<1-1> Skladištenje integralne slike.
+  \item<1-1> 3 porta za čitanje.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.5\textwidth}{!}{%
+      \begin{overprint}
+        \onslide<1>\input{../images/tikz/frame_buffer.tex}
+      \end{overprint}
+    }
+  \end{figure}
+\end{frame}
+
+\subsection{Računanje standardne devijacije}
+
+\begin{frame}
+  \frametitle<1-1>{stddev}
+
+  \begin{itemize}
+  \item<1-1> Korekcija osetljivosti na osvetljaj.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.55\textwidth}{!}{%
+      \begin{overprint}
+        \onslide<1>\input{../images/tikz/stddev.tex}
+      \end{overprint}
+    }
+  \end{figure}
+\end{frame}
+
+\subsection{Memorija obeležja}
+
+\begin{frame}
+  \frametitle<1-1>{features\_mem}
+
+  \begin{itemize}
+  \item<1-2> Pravougaonik se može predstaviti jednom tačkom, širinom i visinom.
+  \item<2-2> Po 1 RAM za svaki pravougaonik i za težine.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.55\textwidth}{!}{%
+      \begin{overprint}
+        \onslide<1>\input{../images/tikz/rect_mem_unpack.tex}
+        \onslide<2>\input{../images/tikz/features_mem.tex}
+      \end{overprint}
+    }
+  \end{figure}
+\end{frame}
+
+\subsection{Klasifikator}
+
+\begin{frame}
+  \frametitle<1-1>{Classifier}
+
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-76mm-1mm}
+    \begin{itemize}
+    \item<1-> 4 memorije.
+    \item<1-> 3 pravougaonika u paraleli.
+    \item<1-> Pragovi za obeležje i etapu.
+    \item<1-> Povratne vrednosti obeležja.
+    \item<1-> Korekcija standardnom devijacijom.
+    \item<1-> Lokalni reset.
+    \end{itemize}
+
+
+    \column{80mm}
+      \begin{figure}[H]
+        \resizebox{0.92\textwidth}{!}{%
+          \input{../images/tikz/classifier.tex}
+          }
+        \end{figure}
+
+  \end{columns}
+  % \begin{itemize}
+  % \item<1-2> Pravougaonik se može predstaviti jednom tačkom, širinom i visinom.
+  % \item<2-2> Po 1 RAM za svaki pravougaonik i za težine.
+
+  % \end{itemize}
+
+  % \begin{figure}[H]
+  %   \resizebox{0.65\textwidth}{!}{%
+  %       \input{../images/tikz/classifier.tex}
+  %   }
+  % \end{figure}
+\end{frame}
+
+
+
+\end{document}

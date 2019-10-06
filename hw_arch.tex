@@ -500,6 +500,7 @@ Ostale koordinate moguće je dobiti na sledeći način:
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
+  \captionof{table}{Struktura zapakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_packed_struct}
   \begin{tabular}{| P{1.5cm} | P{2.5cm} |}
     \hline
     N & Packed value(20 bit) \\ \hline
@@ -512,12 +513,12 @@ Ostale koordinate moguće je dobiti na sledeći način:
     $.$ & $.$ \\ \hline
     feature num - 1 &0x088d6 \\ \hline
   \end{tabular}
-  \captionof{table}{Struktura zapakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_packed_struct}
 \end{center}
 
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
+  \captionof{table}{Struktura raspakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_unpacked_struct}
     \begin{tabular}{| P{1.5cm} | P{2cm} | P{2cm} | P{4cm} |}
     \hline
      N  & Height (5bit) & Width (5bit) & A linear coord (10bit) \\ \hline
@@ -530,7 +531,6 @@ Ostale koordinate moguće je dobiti na sledeći način:
       $.$ & $.$ & $.$ & $.$ \\ \hline
       feature num - 1 & 22 & 6 & 34 \\ \hline
     \end{tabular}
-    \captionof{table}{Struktura raspakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_unpacked_struct}
 \end{center}
 
 Na tabeli(\ref{rect_rom_packed_struct}) je prikazana strukura zapakovane memorije
@@ -580,6 +580,7 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
 
 \begin{center}
   \centering
+  \captionof{table}{Veličina memorije features\_mem za model \ref{haarcascade_frontal_sec}} \label{feature_mem_size}
     \begin{tabular}{| P{3.0cm} | P{3.0cm}|}
     \hline
      \textbf{feature\_num} & \featureNum{}  \\ \hline
@@ -588,7 +589,6 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
      \textbf{w\_rect} & \wRect{} bits  \\ \hline
       \cellcolor{green!35} \textbf{TOTAL} & \cellcolor{green!35} \num[group-separator={,}]{\result{}} bits \\ \hline
     \end{tabular}
-    \captionof{table}{Veličina memorije features\_mem za model \ref{haarcascade_frontal_sec}} \label{feature_mem_size}
 \end{center}
 
 \newpage

@@ -28,7 +28,7 @@ all: $(MAINFILE).pdf
 
 
 $(MAINFILE).pdf: $(TESTS) $(EXTRA_FILES)
-	for number in 1 2 3 4 5 6; do \
+	-for number in 1 2 3 4 5 6; do \
 		makeglossaries $(MAINFILE); \
 		latexmk -pdf --synctex=1 -interaction=nonstopmode  -file-line-error  $(MAINFILE); \
 	done
@@ -58,9 +58,13 @@ clean:
 	-rm -f *.fdb_latexmk
 	-rm -f *.toc
 	-rm -f *.bbl
-	-rm -f *.pdf
+	-rm -f $(MAINFILE).pdf
 	-rm -f *.ps
 	-rm -f *.dvi
+	-rm -f *.lot
+	-rm -f *.pyg
+	-rm -f *.lof
+	-rm -f *.listing
 	-rm -f *.blg
 	-rm -f *.out
 	-rm -f make/bib
@@ -68,7 +72,11 @@ clean:
 
 .PHONY: cleanall
 cleanall: clean
-	-rm -f *.pdf
+	-rm -f $(MAINFILE).pdf
 	-rm -f *.ps
+	-rm -f *.lot
+	-rm -f *.lof
+	-rm -f *.listing
+	-rm -f *.pyg
 	-rm -f *.dvi
 	-rm -rf ./make
