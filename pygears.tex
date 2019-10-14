@@ -3,7 +3,7 @@
 \subsection{Uvod}
 
 PyGears\cite{pygears_site} pozajmljuje koncepte iz funkcionalnog programiranja i primenjuje ih na
-dizajnu digitalnog hardvera \\
+dizajn digitalnog hardvera \\
 Sastoji se od Gears metodologije i Python Framework koji implementira Gears metodologiju. \\
 Gears metodologija omogućava lako povezivanje i kompozabilnost sistema pomoću manjih
 funkcionalnih jedinica pod nazivom gear-ovi. \\
@@ -30,12 +30,12 @@ RTL metodologija pruža standardan način translacije sekvencijalnog algoritma u
 hadverski opis.
 Struktura dobijena pomoću RTL metodologije uglavnom se sastoji od \textbf{\gls{fsmd}}. \\
 Datapath sadrži funkcionalne i memorijske jedinice i mreže za rutiranje podataka\cite{PSDS_5} \\
-Controlpath diriguje podacima u Datapath delu i sačinjena je od mašine stanja.\\
+Controlpath diriguje podacima u Datapath delu i sačinjen je od mašine stanja.\\
 
 Kako dizajn implementiran pomoću RTL metodologije postaje kompleksniji i mašina
 stanja postaje kompleksnija i sadrži više stanja.
 Pipeline-ovanje, debagovanje  ovakvog dizajna može biti veoma teško. \\
-Prednost PyGears metodologije u odnosu na RTL metodologiju najvidljivija je u
+Prednost Gears metodologije u odnosu na RTL metodologiju najvidljivija je u
 sistemima koji su Dataflow orijentisani.
 
 \subsection{Jezici za opis hardvera}
@@ -50,8 +50,7 @@ alati su zreli i dobro istestirani. \\
 Sve kompanije koje proizvode FPGA čipove trenutno ne objavljuju
 arhitekturu svojih FPGA čipova, pa alati za sintezu i implementaciju zavise od
 tih kompanija\footnote{Postoji inicijativa da se dokumentuju FPGA čipovi svih velikih
-proizvođača u projektu zvanom SymbiFlow\cite{SymbiFlow}, kao i alati za sintezu
-i implementaciju.}
+proizvođača u projektu zvanom SymbiFlow\cite{SymbiFlow}.}
 .
 Zbog toga direktna podrška alata za sintezu i implementaciju za neki novi HDL jezik je
 nemoguća. \\
@@ -230,17 +229,23 @@ Konačno u taktu 9 oba EOT bita su na visokom nivou što označava poslednji pod
 \subsection{Čistoća Gear-ova} \label{gear_purity}
 
 Kako bi se gear-ovi lakše povezivali i njihova funkcionalnost i ponašanje bilo
-razumljivo i predvidljivo dizajneru preporučuje se pisanje ``Čistih''  gear-ova. \\
+razumljivo i predvidljivo dizajneru, preporučuje se pisanje ``čistih''  gear-ova. \\
 ``Čist'' gear je onaj čije je inicijalno stanje dobro poznato i koji će se nakon
 izvršene funkcionalnosti potpuno vratiti u inicijalno stanje. \\
 Čisto kombinacioni gear-ovi su uvek ``čisti''.
 
+\newpage
 \subsection{Definicija Gear komponenti}
 
 PyGears trenutno podržava tri načina za implementaciju Gear komponenti.
 
-\lstinputlisting[language=Python, mathescape, caption={Primer definisanja Gear
-  komponente}, captionpos=b, label=gear_example1]{gear1.py}
+\begin{code}[H]{python}{Primer definisanja Gear komponente}{gear_example1}
+@gear
+def gear_name(in1: T1, ..., inN: TN,
+              *,
+              p1=dflt, ..., pM=dfltM) -> ReturnType:
+    # Gear implementation
+\end{code}
 
 Primer(\ref{gear_example1}) prikazuje definisanje gear komponente. \\
 Dekorator \textbf{@gear} označava da je funkcija gear\_name zapravo Gear komponenta,
@@ -281,8 +286,13 @@ Moguće je i pisati opis gear-a u Python-u pomoću HDL kompajlera. \\
 Kao primer prikazan je serialize gear koji kao ulaz prima niz podataka, a na
 izlazu daje jedan po jedan podatak ulaznog niza, odnosno serializuje podatke.
 
-\lstinputlisting[language=Python, mathescape, caption={Primer kompajliranog
-  serialize gear-a}, captionpos=b, label=serialize_example]{serialize.py}
+\begin{code}[H]{python}{Primer kompajliranog serialize gear-a}{serialize_example}
+@gear(svgen={'compile': True})
+async def serialize(din: Array) -> b'din.dtype':
+    async with din as val:
+        for i in range(len(din.dtype)):
+            yield val[i]
+\end{code}
 
 Kao primer možemo uzeti niz \textbf{Array[Uint[4], 3](3, 7, 9)} za očekivati je da će se
 na izlazu pojaviti podaci redom 3, 7 pa 9 što je prikazano na slici \ref{serialize_example2}.

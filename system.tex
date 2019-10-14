@@ -17,7 +17,7 @@ IP jezgro unutar Zynq SoC platforme kompanije Xilinx. \\
 
 \subsection{Zynq}
 
-Zynq se sastoji od \gls{ps} sistem i \gls{pl} sistema.
+Zynq se sastoji od \gls{ps} sistema i \gls{pl} sistema.
 PS sistem je sačinjen od već pomenutog ARM Cortex-A9 \gls{APU} procesora.
 Dok PL sistem predstavlja \gls{fpga} programabilnu logiku Artix-7 familije. \\
 
@@ -27,7 +27,7 @@ interapt pinova ili \gls{emio} pinova.\\
 ARM procesor ima mogućnost povezivanja eksterne \gls{ddr} memorije preko
 internog DDR kontrolera.
 Preko ovog kontrolera pristup memoriji ima i PL sistem. \\
-Zynq SoC ima podršku GNU/Linux operativnog sistema.
+Zynq SoC ima mogućnost pokretanja GNU/Linux operativnog sistema.
 
 \newpage
 
@@ -36,7 +36,7 @@ Zynq SoC ima podršku GNU/Linux operativnog sistema.
 U nastavku je prikazan okviran blok dijagram povezivanja projektovanog IP jezgra
 sa procesorskim sistemom. \\
 Na slici su izostavljene interkonekcijske komponente, generatori reset i clk signala,
-memorijske konekcije itd... \\
+DDR konekcije itd... \\
 
 \begin{figure}[H]
   \centering
@@ -51,7 +51,7 @@ Blokovi obojeni crvenom bojom su projektovani u okviru ovog rada.
 Blokovi obojeni plavom bojom su standardne komponente i mogu se naći u okviru
 softverskog alata od proizvođača korišćenog SoC-a. \\
 
-Kako je već rečeno spoljni interfejsi \textbf{cascade\_classifier} IP jezgro su
+Kako je već rečeno spoljni interfejsi \textbf{cascade\_classifier} IP jezgra su
 Streaming tipa.
 Streaming interfejsi nemaju informaciju o adresi, tako da sa njima nije
 moguće adresirati podatak iz DDR memorije preko DDR kontrolera. \\
@@ -67,7 +67,7 @@ kojoj adresi se smeštaju rezultati, pa je zato za generisanje komande za Data M
 komponente zadužen dm\_cmd.\\
 Komponenta dm\_cmd od procesora dobija adresu bafera slike i rezultata iz eksterne DDR
 memorije i na osnovu toga generiše komande za Data Mover-e. \\
-Procesor adrese i broj podataka šalje preko apu\_cmd interfejsa. \\
+Adrese i broj podataka procesor šalje preko apu\_cmd interfejsa. \\
 
 Nakon konfigurisanja Data Mover-a prvo će sa radom početi dm\_mm2s Data Mover,
 koji će poslati zahtev za sliku DDR kontroleru i pročitane podatke proslediti
@@ -84,17 +84,22 @@ interrupt za procesor.
 Glavno IP jezgro će držati aktivnim ovaj signal samo jedan takt, dok će se taj
 signal sačuvati u registru u okviru dm\_cmd jezgra i biće prosleđen na izlazni
 irq signal povezan sa procesorom. \\
-Nakon što procesor detektuje interrupt signal, to je znak procesoru da može da
-pripremi sledeću sliku.
-Nakon smeštanja naredne slike u bafer procesor treba da resetuje registrovani
-interrupt u okviru dm\_cmd jezgra, to radi slanjem komande preko apu\_cmd
-interfejsa. \\
-Nakon resetovanja interrupt signala, procesor ponovo šalje zahtev za obradu
-slike. \\
+Nakon detekcije interapt signala od strane procesora, poslaće se zahtev za reset
+ovog registra preko apu\_cmd interfejsa.
+Sam interapt signal procesoru signalizira da može početi sa pripremanjem sledeće
+slike.
+Nakon smeštanja naredne slike u bafer, procesor ponovo šalje zahtev za obradu
+slike preko apu\_cmd interfejsa. \\
 
 Procesor pored slanja komande IP jezgru treba da preuzme sliku sa kamere ili
 učita iz fajla, zatim je konvertuje u grayscale reprezentaciju.
-Rezultate detekcije procesor može koristiti za željeni zadatak. \\
+Nakon prihvatanja rezultata detekcije procesor može koristiti dobijene
+koordinate za željeni zadatak. \\
+Broj primena algoritama za detekciju objekata je ogroman i od korisnika zavisi
+dalja implementacija softvera.
+Rad IP jezgra u ovom radu je demonstriran iscrtavanjem pravougaonika na
+pozicijama detektovanih objekata i prikazivanjem slike sa iscrtanim
+pravougaonicima na HDMI monitor. \\
 
 \newpage
 
@@ -118,16 +123,22 @@ senzor, buzzer, flash memorija, SD card socket, Gig ethernet, JTAG, USB, CAN itd
 
 Od eksternih periferija u ovom projektu korišćeni su SD kartica, Ethernet, HDMI,
 USB i DDR memorija.
-Procesor izvršava Arch Linux\cite{arch} operativni sistem, a komunikacija sa IP jezgrom je
+Procesor pokreće Arch Linux ARM\cite{arch} operativni sistem, a komunikacija sa IP jezgrom je
 odrađena preko napisanog Linux Kernel Drivera i korisničke aplikacije. \\
 
-Na sledećoj strani prikazan je blok dijagram integratora implementiranog
+Na sledećoj strani prikazan je blok dijagram Vivado integratora implementiranog
 sistema. \\
 Može se primetiti da pored komentarisanih komponenti za povezivanje procesora sa
 IP jezgrom, na blok dijagramu se nalazi i Video kontroler pod nazivom
 hdmi\_core.
 Ovo jezgro se koristi za slanje sadržaja framebuffer-a Linux Kernel-a na
 eksterni HDMI kontroler, u cilju grafičkog interfejsa korisničke aplikacije. \\
+IP jezgro je povezano sa AXI stream periferija preko axi\_to\_dti i cast blokova,
+ovi blokovi prilagođavaju DTI EOT signal sa AXI TLast signalom koji označavaju
+kraj transakcije. \\
+Ulazni EOT signal označava kraj upisa u IMG RAM memoriju, dok izlazni EOT signal
+signalizira Data Moveru da je završena transakcija i može upisati baferovane
+podatke u DDR. \\
 
 \includepdf[pages=-,pagecommand={},width=1.6\textwidth, height=1.2\textheight]{images/system_bd.pdf}
 
@@ -149,7 +160,7 @@ radnje.
 Tako u slučaju Xilinx FPGA čipova potrebno je koristiti Vivado.\\
 
 Prilikom sinteze hardvera alat hijerarhijski struktruirane HDL modele izravna i
-napravi model sa istom hijerarhijom sačuvan u formatu netliste.
+napravi model sa jednakom hijerarhijom sačuvan u formatu netliste.
 Tokom sinteze se rade i razne optimizacije poput deljenja funkcionalnih resursa,
 logička minimizacija, optimizacija mašina stanja itd...
 Konačno alat za sintezu može mapirati komponente generisane netliste u
@@ -168,6 +179,8 @@ Pošto su poznata kašnjenja primitivnih blokova i moguća je estimacija kašnje
 mreže za rutiranje može se proceniti da li će dizajn zadovoljavati vremenska
 ograničenja. \\
 Takođe moguće je proceniti i potrošnju konačne implementacije. \\
+Konačno potrebno je generisati Bitstream fajl kojim će se konfigurisati FPGA
+čip. \\
 
 Pored zvaničnih alata za sintezu i implementaciju digitalnog hardvera na FPGA
 čipovima, postoje i alternativna Open Source rešenja.
@@ -175,7 +188,7 @@ Problem sinteze rešava alat pod nazivom yosys\cite{yosys}, ovaj alat je brži o
 zvaničnih alata za sintezu, uz to u nekim slučajevima generiše optimalniji
 hardver, dok je manje efikasan u mapiranju hardvera na tehnologiju. \\
 Za Place and Route može se koristiti nextpnr\cite{nextpnr}.
-Pored toga postoji projekat SymbiFlow\cite{symbiflow} koji nastoji da poveže sve
+Pored toga postoji projekat SymbiFlow\cite{SymbiFlow} koji nastoji da poveže sve
 ove alate i obezbedi jedinstveni alat za implementaciju digitalnog hardvera na
 FPGA čipove nezavisno od proizvođača.
 Veliki problem u ovom projektu predstavlja što FPGA proizvođači ne objavljuju
@@ -193,7 +206,7 @@ Biće prikazana potrošnja samo glavnog IP jezgra i ukupnog sistema. \\
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
-  \captionof{table}{Hardverski resursi nakon sinteze}
+  \captionof{table}{Hardverski resursi nakon sinteze PyGears implementacije}
   \begin{tabular}{| P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} |}
     \hline
     Name  & LUT & FF & BRAM & DSP  \\ \hline
@@ -207,14 +220,71 @@ Kao što se može videti najkritičniji deo ovog IP jezgra je broj korišćenih 
 komponenti što je bilo i očekivano na osnovu analize predložene arhitekture. \\
 Može se videti da je projektovano jezgro veoma efikasno u pogledu ostalih
 hardverskih resursa i ostaje prostora za ubrzanje dodavanjem hardverskih
-resursa, odnosno paralelizma.
+resursa, odnosno paralelizma. \\
+
+U nastavku je data tabela zauzeća hardverskih resursa u slučaju SystemVerilog
+implemtacije iste arhitekture. \\
+
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\begin{center}
+  \centering
+  \captionof{table}{Hardverski resursi nakon sinteze SystemVerilog implementacije}
+  \begin{tabular}{| P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} | P{3cm} |}
+    \hline
+    Name  & LUT & FF & BRAM & DSP  \\ \hline
+    Total & 9,648 (18\%) & 13,875 (13\%) & 53.5 (38\%) & 15 (7\%)  \\ \hline
+    Cascade Classifier & 1,605 (3\%) & 2,094 (2\%) & 41 (29\%) & 15 (7\%) \\ \hline
+  \end{tabular}
+\end{center}
+
+Kao što je i očekivano SystemVerilog verzija troši manje hardverskih resursa.\\
+Dodatni hardverski resursi u slučaju PyGears implementacije se uglavno ogledaju
+u dodatnim LUT-ovima i FF-ovima.
+Ovi LUT-ovi i FF-ovi implementiraju sinhronizaciju i handshaking u
+okviru PyGears dizajna.
+Kao što se može videti postoji razlika između potrošnje DSP blokova i BRAM
+memorija, ove komponente uglavnom se koriste prilikom implementacije aritmetike
+i memorije potrebne za samu funkcionalnost dizajna, a ne za implementaciju
+sinhronizacionih komponenti.\\
+
+Prilikom sinteze alat može odlučiti na osnovu širina magistrala da li će
+aritmetičku operaciju implementirati kao DSP blok, pomoću LUT-ova ili drugih komponenti, u ova dva
+slučaja zbog razlike u širinama internih signala alat za sintezu je istu
+komponentu početne arhitekture implementirao na različite načine.
+Tada se može desiti da su neka množenja i sabiranja u PyGears verziji
+implementirana pomoću LUT-ova, dok su neke RAM ili ROM memorije implementirane
+kao FF ili distribuirani RAM-ovi. \\
+
+Pored toga u PyGears verziji se često dodaju redundantne sinhronizacione
+komponente.
+Primer toga je kada se iz istog izvora razdvaja signal u dve grane, pa se ti
+signali dalje ``broadkastuju'' na više mesta, u ovoj situaciji određen broj dodatnih LUT-ova i
+FF-ova se može ukloniti prilikom sinteze.
+Nažalost zbog prilično jedinstvenog slučaja Vivado ne vrši ovu
+optimizaciju, usled čega konačna implementacija rezultuje u značajnom povećanju
+potrošenih hardverskih resursa.\\
+
+Ova optimizacija je za potrebe PyGears-a dodata u Yosys open source alat za
+sintezu.
+Ova tvrdnja najlakše se može videti na primeru CORDIC IP jezgra.
+Čista Verilog verzija CORDIC IP jezgra je sintetisana pomoću Vivado alata i
+dobijeno je oko 700 LUT-ova i 800 FF-ova.
+Nakon toga implementirano je isto IP jezgro u PyGears-u, gde je nakon sinteze u
+Vivadu dobijeno zauzeće od 2400 LUT-ova i 1100 FF-ova. \\
+Dok je u slučaju prvobitne sinteze pomoću Yosys alata pa nakon toga Vivada
+dobijeno oko 800 LUT-ova i 900 FF-ova.
+Kao što se može videti optimizacioni korak u Yosys sintezi značajno može
+smanjiti broj hardverskih resursa i PyGears metodologija se značajno oslanja na
+kvalitetan alat za sintezu. \\
+Iako je ovo slučaj, u ovom projektu nije korišćen Yosys za sintezu.
+
 
 \subsubsection{Analiza vremenskog izveštaja i Timing Closure}
 
 Frekvencija takta je bitna stavka, što većom frekvencijom taktujemo IP jezgro
 brzina obrade slike će biti brža.
 Naravno postoji ograničenje maksimalne frekvencije koja se može postići.
-Ovo ograničenje postoji zbog kašnjenja logičkih blokova i mreže za rutiranje unutar FPGA čipa.
+Ovo ograničenje postoji zbog vremena propagacije signala kroz logičke blokove i mreže za rutiranje unutar FPGA čipa.
 Izlazni signali flip flopova prolaze kroz kombinacionu logiku i dolaze do ulaza
 sledećeg flip flopa, kašnjenje ove putanje mora biti kraće od periode takta uz
 dodatan uticaj Setup i Hold vremena flip flopova.
@@ -229,7 +299,7 @@ dodatan uticaj Setup i Hold vremena flip flopova.
 Mreža kombinacione logike predstavljena oblačićem može imati značajno vreme
 propagacije.
 Jedan od načina da se vreme propagacije smanji je ubacivanjem registara unutar
-kombinacione mreže. \\
+kombinacione mreže, odnosno presecanje kombinacione putanje. \\
 To je ujedno i najčešća tehnika ubrzavanja dizajna u krajnjoj fazi i
 zadovoljavanja vremenskih ograničenja dizajna, takozvani Timing Closure. \\
 
@@ -238,7 +308,7 @@ zadovoljavanja vremenskih ograničenja dizajna, takozvani Timing Closure. \\
 Nakon podešavanja takta na 47MHz i pokretanja implementacije može se videti da
 su vremena zadovoljena za odabrani takt. \\
 Empirijski se može zaključiti da frekvencija sistema srednje veličine
-implementiranog na Zynq-7020 čipu može dostići brzine do oko 110MHz, na osnovu
+implementiranog na Zynq-7020 čipu može dostići brzine oko 110MHz, na osnovu
 čega možemo zaključiti da se u ovom slučaju mogu postići bolji
 rezultati. \\
 Na slici ispod su prikazane najkritičnije putanje u okviru dizajna. \\
@@ -274,8 +344,34 @@ U svakoj narednoj iteraciji sve je teže uočiti kritične putanje. \\
 PyGears dodatno olakšava proces skraćivanja kombinacionih putanja jednostavnim
 ubacivanjem registara u dizajn što je prikazano na sledećem primeru. \\
 
-\lstinputlisting[language=Python, mathescape, caption={PyGears implementacija
-  stddev komponente}, captionpos=t, label=stddev_pygears]{examples/speedup.py}
+\begin{code}[H]{python}{PyGears implementacija stddev komponente}{gear_example1}
+from pygears import gear
+from pygears.typing import Queue, Uint
+from .frame_sum import frame_sum
+from pygears.lib.rom import rom
+from pygears.lib import dreg as dreg_sp
+
+@gear
+def stddev(ii_s: Queue[Uint['w_ii'], 2],
+           sii_s: Queue[Uint['w_sii'], 2], *,
+           casc_hw):
+
+    ii_sum = ii_s | frame_sum | dreg_sp
+    ii_sum_squared = ii_sum[0] * ii_sum[0]
+
+    sii_sum = sii_s | frame_sum | dreg_sp
+    sii_mult1 = sii_sum[0] * (casc_hw.frame_size[0] - 1)
+    sii_mult2 = sii_mult1 * (casc_hw.frame_size[1] - 1)
+
+    sub_s = sii_mult2 - ii_sum_squared
+
+    sqrt_addr = sub_s >> casc_hw.sqrt_shift | Uint[8]
+
+    stddev_res = sqrt_addr | rom(
+        data=casc_hw.sqrt_mem, dtype=Uint[casc_hw.w_sqrt])
+
+    return stddev_res
+\end{code}
 
 U kodnom segmentu iznad u liniji 5 importuje se gear dreg koji predstavlja
 registar i lokalno se naziva dreg\_sp.
@@ -295,8 +391,6 @@ gear-a u odnosu na drugu granu, usled čega će se na izlazu sinhronizacionog
 gear-a pojaviti neželjeni takt pauze.
 Pažljivom analizom paralelnih grana i sinhronizacionih tačaka, moguće je
 balansirati grane dodavanjem dodatnog registra u nebalansiranoj grani. \\
-
-\newpage
 
 Konačno nakon skraćivanja kombinacionih putanja dostignuta je frekvencija takta
 od 100MHz.\\
@@ -330,6 +424,16 @@ ovim pristupom. \\
 U tom trenutku dolazimo do Timing Closure-a, kada smo zadovoljni sa vremenskim
 karakteristikama sistema. \\
 
+Nakon implementacije bez skraćivanja kombinacionih putanja SystemVerilog dizajna dostiže se frekvencija takta od
+66MHz.
+Takođe bi i za ovu implementaciju bilo potrebno odraditi skraćivanje
+kombinacionih putanja, ali to u ovom radu nije odrađeno. \\
+Za očekivati je da se može dostići malo veća krajnja frekvencija takta u odnosu na
+PyGears implementaciju.
+Pored toga proces skraćivanja kombinacionih putanja može biti i značajno teži u slučaju
+SystemVerilog implementacije i usled nepažnje može doći do narušavanja
+funkcionalnosti dizajna. \\
+
 \subsection{Softver procesora}
 
 Nakon što je isprojektovan i implementiran sistem, potrebno je napisati
@@ -341,10 +445,10 @@ Prednosti Bare Metal aplikacije je veća pouzdanost, jednostavnost i bolje perfo
 nepostojanja schedule-inga. \\
 Prednosti operativnog sistema je brži i lakši razvoj aplikacije, nezavisnost
 aplikacije od platforme, laka implementacija korisničkog interfejsa,
-lak pristup internetu itd...\\
+lak pristup mrežama i internetu itd...\\
 
 U ovom radu je odlučeno da procesor radi na GNU/Linux operativnom sistemu. \\
-Softver je particionisa na sledeći način:
+Softver je particionisan na sledeći način:
 
 \begin{figure}[H]
   \centering
@@ -356,11 +460,31 @@ Softver je particionisa na sledeći način:
 \end{figure}
 
 Kernel Device driver šalje komande dm\_cmd komponenti preko AXI Lite interfejsa.
-Komunikacija između drajvera i AXI Lite komponente se obavlja preko memorijskog
-mapiranja.
+Procesor komunicira sa AXI Lite komponentom kao sa memorijski mapiranom
+periferijom.
 Registri unutar dm\_cmd komponente su mapirani na određenu memorijsku lokaciju u
 okviru adresnog prostora procesora.
-Procesor može pristupati ovim registrima prostim upisivanjem na adresi mapiranih registara.\\
+Procesor može pristupati ovim registrima prostim pisanjem na adresu mapiranih registara.\\
+
+AXI Lite dm\_cmd komponenta se sastoji od sledećih registara.
+
+\renewcommand{\arraystretch}{2.0}
+\captionof{table}{Registarska mapa dm\_cmd komponente} \label{dm_cmd_reg_map}
+\begin{tabular}{| P{3.0cm} | P{4cm} | P{8cm} |}
+  \hline
+  Address Offset & Register Name & Description \\ \hline
+  0x00 & MM2S\_ADDR & Address of source image in DDR. \\ \hline
+  0x04 & MM2S\_BTT & Bytes to transfer for source image. \\ \hline
+  0x08 & S2MM\_ADRR & Destination address for results. \\ \hline
+  0x0C & S2MM\_BTT & Max buffer size for results. \\ \hline
+  0x10 & IRQ\_ENABLE & Enable register for interapt signal. \\ \hline
+  0x14 & START\_CMD & Start register. \\ \hline
+\end{tabular}
+\end{center}
+\vspace{1.5\baselineskip}
+
+Kernel drajver kofiguriše IP jezgro upisivanjem potrebnih podataka na prethodno
+pokazane registre.
 Pored toga interrupt signal koji označava kraj obrade slike se obrađuje unutar
 Kernel drajvera. \\
 Kernel drajver ima implementirane sledeće operacije:

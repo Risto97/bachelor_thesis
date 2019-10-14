@@ -96,6 +96,27 @@
 
 %%% code style %%%
 
+\renewcommand\lstlistingname{Kodni segment}
+\renewcommand\lstlistlistingname{Kodni Segmenti}
+\usepackage{minted}
+% \usemintedstyle{vs}
+% \usemintedstyle{bw}
+\usemintedstyle{colorful}
+% \usemintedstyle{tango}
+
+\renewcommand\theFancyVerbLine{\normalsize{}\arabic{FancyVerbLine}}
+
+\usepackage[newfloat]{minted}
+\usepackage{caption}
+
+\newenvironment{code}[4][htp]
+{\VerbatimEnvironment
+  \vspace{0.5\baselineskip}
+    \captionof{lstlisting}{#3}\label{#4}
+    \vspace{-0.8\baselineskip}
+    \begin{minted}[frame=lines, linenos, fontsize=\normalsize, breaklines, xleftmargin=20pt, framesep=2.1\fboxsep]{#2}}
+    {\end{minted}}
+
 \renewcommand{\lstlistingname}{Primer}
 \definecolor{mygreen}{rgb}{0,0.6,0}
 \definecolor{mygray}{rgb}{0.5,0.5,0.5}

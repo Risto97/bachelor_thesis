@@ -30,7 +30,7 @@ all: $(MAINFILE).pdf
 $(MAINFILE).pdf: $(TESTS) $(EXTRA_FILES)
 	-for number in 1 2 3 4 5 6; do \
 		makeglossaries $(MAINFILE); \
-		latexmk -pdf --synctex=1 -interaction=nonstopmode  -file-line-error  $(MAINFILE); \
+		latexmk -pdf --synctex=1 -interaction=nonstopmode  -file-line-error --shell-escape $(MAINFILE); \
 	done
 
 make/%.t: %.tex

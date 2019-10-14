@@ -97,7 +97,7 @@ Granice osiguravaju ispravno generisanje adrese, odnosno obezbeđuju da
 adresa za čitanje iz \textbf{IMG RAM} modula nikad ne iskoči iz opsega memorije. \\
 Ove vrednosti su fiksne i moguće ih je izračunati pre sinteze hardvera, pa su
 zato softverski izračunate i prosleđene kao parametri. \\
-Ovaj modul se sastoji od dva multipleksera i liste unapred poznatih konstanti. \\
+Ovaj modul se sastoji od dva multipleksera i liste unapred poznatih konstanti.
 
 \subsubsection{Scale\_ratio}\label{scale_ratio_sec}
 
@@ -105,20 +105,20 @@ Ovaj modul se sastoji od dva multipleksera i liste unapred poznatih konstanti. \
 ulazni podata. \\
 Razlika u odnosu na \textbf{boundaries} modul je u vrednosti parametara.
 Parametri u ovom modulu se prosleđuju \textbf{sweeper} modulu i omogućavaju
-računanje skalirane adrese pomoću aritmetike sa fiksnom tačkom. \\
+računanje skalirane adrese pomoću aritmetike sa fiksnom tačkom.
 
 \subsubsection{Hopper i Sweeper}\label{hopper_sec}
 \textbf{Hopper} se može zamisliti kao dvostruka ugnježdena for petlja gde
 iteratori petlje predstavljaju koordinate \textbf{X} i \textbf{Y}. \\
-Prvo se iterira po \textbf{X} kordinati pa zatim po \textbf{Y}.
+Prvo se iterira po \textbf{X} koordinati pa zatim po \textbf{Y}.
 
-\begin{lstlisting}[language=C++,caption={Primer \textbf{hopper}-a u \textbf{C}-u},captionpos=b, label=hopper_code]
-  for(int y = 0; y < boundary_y[scale_num]; y++){
-    for(int x = 0; x < boundary_x[scale_num]; x++){
-      // Sweeper
-    }
+\begin{code}[H]{cpp}{Primer \textbf{hopper}-a u \textbf{C}-u}{hopper_code}
+for(int y = 0; y < boundary_y[scale_num]; y++){
+  for(int x = 0; x < boundary_x[scale_num]; x++){
+    // Sweeper
   }
-\end{lstlisting}
+}
+\end{code}
 
 Na primeru (\ref{hopper_code}) prikazana je implementacija \textbf{hopper}-a u
 \textbf{C}-u.
@@ -133,21 +133,21 @@ kao početne tačke za brojače \textbf{sweeper}-a koji će biti opisan u nastav
 Slično kao hopper i sweeper se može predstaviti kao dve ugnježdene for petlje. \\
 Ponovo se prvo iterira po X koordinati pa onda po Y.
 
-\begin{lstlisting}[language=C++,caption={Primer \textbf{hopper}-a i \textbf{sweeper}-a u \textbf{C}-u},captionpos=b, label=sweeper_code]
-  int x, y;
-  // hopper
-  for(int hop_y = 0; hop_y < boundary_y[scale_num]; hop_y++){
-    for(int hop_x = 0; x < boundary_x[scale_num]; hop_x++){
-      // sweeper
-      for(y = hop_y; y < hop_y+feature_height; y++){
-        for(x = hop_x; x < hop_x+feature_width; x++){
-          // scale address
-          // translate to linear address
-        }
+\begin{code}[H]{cpp}{Primer \textbf{hopper}-a i \textbf{sweeper}-a u \textbf{C}-u}{sweeper_code}
+int x, y;
+// hopper
+for(int hop_y = 0; hop_y < boundary_y[scale_num]; hop_y++){
+  for(int hop_x = 0; x < boundary_x[scale_num]; hop_x++){
+    // sweeper
+    for(y = hop_y; y < hop_y+feature_height; y++){
+      for(x = hop_x; x < hop_x+feature_width; x++){
+        // scale address
+        // translate to linear address
       }
     }
   }
-\end{lstlisting}
+}
+\end{code}
 
 Kao što se vidi na primeru (\ref{sweeper_code}) \textbf{hopper} i \textbf{sweeper} se zajedno mogu
 predstaviti kao četiri ugnježdene for petlje. \\
@@ -247,7 +247,7 @@ Operaciju skaliranja obavlja modul \textbf{addr\_trans}. \\
 
 Jedan od kritičnih delova Viola-Jones algoritma je generisanje integralne slike
 opisane u poglavlju \ref{ii_sec}. \\
-Ispostavlja da i u hardverskoj implementaciji generisanje
+Ispostavlja se da i u hardverskoj implementaciji generisanje
 integralne slike ima veliki uticaj na performanse i potrebne hardverske resurse sistema. \\
 
 Možemo izabrati sekvencijalni ili paralelni algoritam. \\
@@ -263,10 +263,10 @@ Zbog jednostavnosti i potrebom za malim brojem resursa za ovu arhitekturu
 odabran je sekvencijalni algoritam generisanja integralne slike koji odgovara
 jednačini(\ref{IntegralImage_eq2}) iz sekcije \ref{ii_sec}.\\
 
-Prednosti ovog algoritma u odnosu na paralelni su manji memorijski zahtevi na
-ulaznom i izlaznom interfejsu, potrebno je manje funkcionalnih jedinica i
+Prednosti ovog algoritma u odnosu na paralelni je manje pristupa memoriji preko
+ulaznog i izlaznog interfejsa, potrebno je manje funkcionalnih jedinica i
 unutrašnje memorije.
-Dok je  mana je manja brzina računanja. \\
+Mana je manja brzina računanja.
 Ovaj algoritam izračunava po jedan piksel svaki takt. \\
 
 \begin{figure}[H]
@@ -281,7 +281,7 @@ Ovaj algoritam izračunava po jedan piksel svaki takt. \\
 Na slici(\ref{ii_gen}) prikazana je uprošćena šema generatora integralne slike.
 \\
 
-Ulazni interfejs ovom modula se povezuje izlaznim interfejsom IMG RAM memorije.
+Ulazni interfejs ovog modula je povezan sa izlaznim interfejsom IMG RAM memorije.
 \\
 
 Pikseli u istom redu se akumuliraju pomoću sabirača i registra unutar accum modula.
@@ -346,7 +346,7 @@ Sastoji se od brojača za adresu upisa i RAM memorija.
 Brojač adrese upisa se inkremetuje za jedan nakon svakog primljenog podatka kao
 i kod IMG RAM modula.
 Brojač nije prikazan na blok dijagramu iznad. \\
-Potrebna veličina RAM memorije je data sledećim vezama:
+Potrebna veličina jedne RAM memorije je data sledećim vezama:
 
 \begin{figure}[H]
   \begin{subfigure}
@@ -357,20 +357,23 @@ Potrebna veličina RAM memorije je data sledećim vezama:
   \end{subfigure}
   \hfill
   \begin{subfigure}
+    \vspace{-1.4\baselineskip}
     \begin{equation}
       w\_ii = ceil(log_2(frame\_width * frame\_height * 2^{w\_img}))
       \label{frame_buffer_eq2}
     \end{equation}
   \end{subfigure}
 \end{figure}
-
+\vspace{-1.4\baselineskip}
 Gde su frame\_width i frame\_height širina i visina obeležja modela, w\_ii je
-širina magistrale integralne slike, w\_img je ulazna širina magistrale piksela
+širina magistrale integralne slike, w\_img je širina ulazne magistrale piksela
 slike. \\
 
 Radi ubrzavanja rada klasifikatora možemo računati sva tri pravougaonika (\ref{haar_features_sec}) u paraleli.
 Da bi se to obezbedilo potrebno je čitati u istom taktu tri vrednosti iz
 frame\_buffer memorije.
+U ovom slučaju bi nam trebala RAM memorija sa jednim portom za upis i tri porta
+za čitanje.
 Kako je više-portna memorija skupa i retko se nalazi u FPGA čipovima moguće
 rešenje je koristiti tri dvo-portne memorije.
 Ovo će kao rezultat zauzeti tri puta više RAM memorije na čipu, od koje će svaka
@@ -385,44 +388,41 @@ Primer prikazan na slici(\ref{frame_buffer_bd}).
 \subsection{Modul stddev}
 
 Računanje standardne devijacije prozora je potrebno kako bi se smanjio uticaj
-različitog osvetljenja objekata na slikama. \\
-Za ovo je zadužen modul stddev. U sledećem primeru prikazano je računanje
-standardne devijacije u C++-u.
+različitog osvetljenja objekata na slikama.
 
-\begin{lstlisting}[language=C++,caption={Primer računanja standardne devijacije u \textbf{C}-u},captionpos=b, label=stddev_code]
-  long calcStddev(long sii[FRAME_HEIGHT][FRAME_WIDTH],
-                  long ii[FRAME_HEIGHT][FRAME_WIDTH]){
+\begin{code}[H]{cpp}{Primer računanja standardne devijacije u \textbf{C}-u}{stddev_code}
+long calcStddev(long sii[FRAME_HEIGHT][FRAME_WIDTH],
+                long ii[FRAME_HEIGHT][FRAME_WIDTH]){
+  long mean, stddev;
 
-    long mean, stddev;
+  mean = ii[0][0] + ii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - ii[0][FRAME_WIDTH-1] - ii[FRAME_HEIGHT-1][0];
 
-    mean = ii[0][0] + ii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - ii[0][FRAME_WIDTH-1] - ii[FRAME_HEIGHT-1][0];
+  stddev = sii[0][0] + sii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - sii[0][FRAME_WIDTH-1] - sii[FRAME_HEIGHT-1][0];
 
-    stddev = sii[0][0] + sii[FRAME_HEIGHT-1][FRAME_WIDTH-1] - sii[0][FRAME_WIDTH-1] - sii[FRAME_HEIGHT-1][0];
+  stddev = (stddev * (FRAME_WIDTH-1)*(FRAME_HEIGHT-1));
+  stddev = stddev - (mean*mean);
+  stddev = getSqrt(stddev);
+  return stddev;
+}
+\end{code}
 
-    stddev = (stddev * (FRAME_WIDTH-1)*(FRAME_HEIGHT-1));
-    stddev = stddev - (mean*mean);
-    stddev = getSqrt(stddev);
-    return stddev;
-  }
-\end{lstlisting}
-
-Za računanje standardne devijacije potrebne su pikseli ivice prozora integralne i
-kvadratne integralne slike, što se vidi u liniji 6 i 8
+Za računanje standardne devijacije potrebni su pikseli ivice prozora integralne i
+kvadratne integralne slike, što se vidi u liniji 5 i 7
 primera(\ref{stddev_code}). \\
 Sabiranjem gornjeg levog i donjeg desnog piksela zatim oduzimanje gornjeg desnog
-i donjeg levog integralne slike dobijamo sumu piksela celog prozora. \\
+i donjeg levog piksela integralne slike dobijamo sumu piksela celog prozora. \\
 Ako pogledamo primer u C-u vidimo da imamo operacije sabiranja, oduzimanja,
 kvadriranja promenljivih, zatim množenje sa konstantom. \\
 Sa ovim operacijama većina alata za sintezu nema problem prilikom mapiranja i
 većina FPGA čipova ima potrebne funkcionalne jedinice. \\
 
-Konačno potrebno je odraditi kvadratni koren u liniji 12. \\
+Konačno potrebno je odrediti kvadratni koren u liniji 11. \\
 Ovo je operacija koju alati za automatsku sintezu ne mogu implementirati
 na FPGA čipovima, pa je potrebno pronaći dobru aproksimaciju. \\
 
-U ovom projektu je odlučeno koristiti lookup tabelu. \\
+U ovom projektu je odlučeno da se koristi lookup tabela. \\
 Za unapred definisani opseg vrednosti operanda za korenovanje softverski su
-izračunate vrednosti kvadratnog korena i smeštene u listu. \\
+izračunate vrednosti kvadratnog korena i smeštene u ROM memoriju. \\
 Prilikom softverske analize odlučeno je da je 256 vrednosti korena dovoljno za ispravan
 rad celog sistema, uz minimalan gubitak pouzdanosti. \\
 
@@ -450,7 +450,9 @@ objašnjeno u sekciji \ref{haar_features_sec}. \\
 Svaki pravougaonik je definisan sa četiri koordinate (A, B, C, D) i sa težinom
 njegove površine. \\
 Zbog čestog i ponovljenog pristupa ovim obeležjima potrebno ih je skladištiti u
-lokalnoj memoriji. \\
+lokalnoj memoriji.
+U ovom slučaju se radi o ROM memoriji, koja sadrži obeležja odabranog OpenCV
+modela.\\
 
 Zbog uštede memorije u hardverskoj implementaciji, moguće je svaki pravougaonik predstaviti koordinatom jedne njegove tačke zatim
 širinom i visinom pravougaonika.
@@ -473,6 +475,8 @@ Sa slike(\ref{rect_repr_graph}) mogu se videti potrebni parametri za
 reprezentaciju pravougaonika. \\
 Kao referentu koordinatu izabrana je tačka A od koje se meri širina i visina
 pravougaonika kao na slici. \\
+Koordinate smeštene u ovoj memoriji se koriste za adresiranje podataka iz
+frame\_buffer memorije opisane ranije.
 Kako je za adresiranje podatka iz RAM-a potrebna linearna adresa kao što je
 objašnjeno u sekciji(\ref{addr_trans_sec}) koordinata tačke A je linearizovana u
 softveru. \\
@@ -500,7 +504,7 @@ Ostale koordinate moguće je dobiti na sledeći način:
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
-  \captionof{table}{Struktura zapakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_packed_struct}
+  \captionof{table}{Struktura zapakovane memorije rect\_ROM0 za model(\ref{haarcascade_frontal_sec})} \label{rect_rom_packed_struct}
   \begin{tabular}{| P{1.5cm} | P{2.5cm} |}
     \hline
     N & Packed value(20 bit) \\ \hline
@@ -518,7 +522,7 @@ Ostale koordinate moguće je dobiti na sledeći način:
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 \begin{center}
   \centering
-  \captionof{table}{Struktura raspakovane memorije rect\_ROM0 za model \ref{haarcascade_frontal_sec}} \label{rect_rom_unpacked_struct}
+  \captionof{table}{Struktura raspakovane memorije rect\_ROM0 za model(\ref{haarcascade_frontal_sec})} \label{rect_rom_unpacked_struct}
     \begin{tabular}{| P{1.5cm} | P{2cm} | P{2cm} | P{4cm} |}
     \hline
      N  & Height (5bit) & Width (5bit) & A linear coord (10bit) \\ \hline
@@ -548,6 +552,7 @@ linearne koordinate A. \\
 
 Pored rect\_ROM memorije potrebna je weight\_ROM memorija koja će čuvati
 vrednosti težina za svaki pravougaonik.
+Površine pravougaonika obeležja je potrebno pomnožiti sa ovim težinama. \\
 
 \begin{figure}[H]
   \centering
@@ -566,10 +571,10 @@ Postoje po 3 \textbf{rect\_ROM} i \textbf{weight\_ROM} memorije prethodno
 opisane, po jedna za svaki pravougaonik u obeležju. \\
 Komponenta \textbf{calc\_coords} vrši raspakivanje memorije opisane u
 tablici(\ref{rect_rom_packed_struct}) na način opisan
-formulama(\ref{rects_calc_coords_B}, \ref{rects_calc_coords_D},
+jednačinama(\ref{rects_calc_coords_B}, \ref{rects_calc_coords_D},
 \ref{rects_calc_coords_C}}). \\
 
-Konačno može se izračunati potrebna memorija u slučaju modela opisanog u
+Konačno može se izračunati potrebna količina memorije u ovom modulu u slučaju modela opisanog u
 sekciji(\ref{haarcascade_frontal_sec}). \\
 
 \newcommand{\featureNum}{2913}
@@ -595,8 +600,8 @@ sekciji(\ref{haarcascade_frontal_sec}). \\
 
 \subsection{Modul classifier}
 
-\textbf{Classifier} modul obavlja samu klasifikaciju prozora.
-Pored ii\_gen(\ref{ii_sii_gen_sec}) modula najviše utiče na performanse sistema. \\
+\textbf{Classifier} modul vrši klasifikaciju prozora.
+Odnosno signalizira da li se na posmatranom prozoru nalazi traženi objekat.\\
 
 Na slici ispod je prikazan blok dijagram klasifikatora.\\
 
@@ -613,63 +618,63 @@ Na slici ispod je prikazan blok dijagram klasifikatora.\\
 
 Sledeći primeri u C-u približno opisuje algoritam rada klasifikatora.
 
-\begin{lstlisting}[language=C++,caption={Weighted\_sum u \textbf{C}-u},captionpos=b, label=weighted_sum_code]
-  int weights[RECT_NUM][FEATURE_NUM]; //feature weights
-  int rects[RECT_NUM][FEATURE_NUM][4];//unpacked rect_coords
+\begin{code}[H]{cpp}{Weighted\_sum u \textbf{C}-u}{weighted_sum_code}
+int weights[RECT_NUM][FEATURE_NUM];           //feature weights
+int rects[RECT_NUM][FEATURE_NUM][4];          //unpacked rect_coords
 
-  long weighted_sum_i(int ii[FRAME_HEIGHT][FRAME_WIDTH],
-                      int f,      // feature_num
-                      int r){     // rect_num
+long weighted_sum_i(int ii[FRAME_HEIGHT][FRAME_WIDTH],
+                    int f,                    // feature_num
+                    int r){                   // rect_num
 
-    long sum = ii[rects[r][f][0][1]][rects[r][f][0][0]] +
-               ii[rects[r][f][3][1]][rects[r][f][3][0]] -
-               ii[rects[r][f][2][1]][rects[r][f][2][0]] -
-               ii[rects[r][f][1][1]][rects[r][f][1][0]];
-    sum *= weights[r][f];
+  long sum = ii[rects[r][f][0][1]][rects[r][f][0][0]] +
+             ii[rects[r][f][3][1]][rects[r][f][3][0]] -
+             ii[rects[r][f][2][1]][rects[r][f][2][0]] -
+             ii[rects[r][f][1][1]][rects[r][f][1][0]];
+  sum *= weights[r][f];
 
-    return sum;
-  }
-  long weighted_sum(int ii[FRAME_HEIGHT][FRAME_WIDTH],
-                    int feature_num){
-    long sum0 = weighted_sum_i(ii, feature_num, 0);
-    long sum1 = weighted_sum_i(ii, feature_num, 1);
-    long sum2 = weighted_sum_i(ii, feature_num, 2);
+  return sum;
+}
+long weighted_sum(int ii[FRAME_HEIGHT][FRAME_WIDTH],
+                  int feature_num){
+  long sum0 = weighted_sum_i(ii, feature_num, 0);
+  long sum1 = weighted_sum_i(ii, feature_num, 1);
+  long sum2 = weighted_sum_i(ii, feature_num, 2);
 
-    return sum0 + sum1 + sum2;
-  }
-\end{lstlisting}
+  return sum0 + sum1 + sum2;
+}
+\end{code}
 
 Primer \ref{weighted_sum_code} približno prikazuje algoritam rada weighted\_sum
 komponente sa slike(\ref{classifier_bd}).
-Memorije weights i rects se nalaze u features\_mem komponenti u hardveskoj
-implementaciji i objašnjene su u sekciji(\ref{features_meme_sec}).\\
+Memorije weights i rects se nalaze u features\_mem komponenti u hardverskoj
+implementaciji i objašnjene su u sekciji(\ref{features_meme_sec}).
+Memorija ii predstavlja frame\_buffer modul u hardverskoj arhitekturi. \\
 
-Funkcija weighted\_sum\_i() računa sumu piksela pravougaonika na integralnoj slici.
+Funkcija weighted\_sum\_i() računa površinu pravougaonika na slici.
+Pritom koristi integralnu sliku radi bržeg proračuna.
 Kao na slici(\ref{IntegralImage_img2}) na integralnoj slici potrebno je sabrati
 gornji levi i donji desni piksel zatim oduzeti gornji desni i donji levi
 piksel.\\
 Pošto svaki pravougaonik ulazi u konačan zbir sa nekom težinom potrebno je
 pomnožiti sumu pravougaonika sa težinom kao u liniji 12. \\
-
 Funkcija weighted\_sum() dodatno sabira težinske sume sva tri pravougaonika.
 
 \newpage
+\begin{code}[H]{cpp}{Leaf\_val u \textbf{C}-u}{leaf_val_code}
+int feature_thresholds[FEATURE_NUM];
+int leaf_val0[FEATURE_NUM];
+int leaf_val1[FEATURE_NUM];
 
-\begin{lstlisting}[language=C++,caption={Leaf\_val u \textbf{C}-u},captionpos=b, label=leaf_val_code]
-  int feature_thresholds[FEATURE_NUM];
-  int leaf_val0[FEATURE_NUM];
-  int leaf_val1[FEATURE_NUM];
+int leaf_val(long stddev,
+             long sum,
+             int feature_num){
 
-  int leaf_val(long stddev,
-               long sum,
-               int feature_num){
-
-    if(sum <= feature_thresholds[feature_num] * stddev)
-        return leaf_val0[feature_num];
-    else
-        return leaf_val1[feature_num];
-  }
-\end{lstlisting}
+  if(sum <= feature_thresholds[feature_num] * stddev)
+      return leaf_val0[feature_num];
+  else
+      return leaf_val1[feature_num];
+}
+\end{code}
 
 Primer(\ref{leaf_val_code}) prikazuje algoritam računanja leaf\_val vrednosti. \\
 Memorija feature\_thresholds se nalazi na slici(\ref{classifier_bd}) pod nazivom
@@ -691,12 +696,13 @@ etape.
 Ukoliko je akumulirana vrednost manja od praga etape može se zaključiti da se na
 posmatranom prozoru ne nalazi objekat.
 Ukoliko je akumulirana vrednost veća od praga etape na posmatranom prozoru se
-može naći objekat i potrebno je izvršiti sledeću etapu. \\
+možda nalazi objekat i potrebno je izvršiti sledeću etapu. \\
 
-\begin{lstlisting}[language=C++,caption={Leaf\_val u \textbf{C}-u},captionpos=b, label=leaf_val_code]
-  int stage_res(int leaf_val,
-                int feature_start,
-                int feature_end){
+\newpage
+\begin{code}[H]{cpp}{Stage\_res u \textbf{C}-u}{leaf_val_code}
+int stage_res(int leaf_val,
+              int feature_start,
+              int feature_end){
   int64_t sum = 0;
 
   for(int feature_num = feature_start;
@@ -708,12 +714,17 @@ može naći objekat i potrebno je izvršiti sledeću etapu. \\
   if(sum < stageThresholds[stage_num]) return -1;
   else return 1;
 }
-\end{lstlisting}
+\end{code}
 
 U hardverskoj implementaciji ukoliko je akumulirana vrednost etape manja od
 praga etape, aktiviraće se local\_rst modul i resetovati \textbf{classifier}
 modul, ovo će signalizirati ostatku sistema da se na posmatranom prozoru ne
-nalazi objekat. \\
+nalazi objekat.
+Nakon čega će se preći na analizu sledećeg prozora.\\
+Ukoliko akumulirane vrednosti obeležja svih etapa imaju veću vrednost od
+praga etapa, može se zaključiti da se posmatranom prozoru zaista nalazi lice.
+U tom slučaju potrebno je proslediti adresu hopper-a na izlazni interfejs IP
+jezgra. \\
 
 \subsection{Interfejsi}
 
@@ -723,7 +734,8 @@ Korišćenjenjem ovog interfejsa dobijena je robusnija komunikacija između
 modula zahvaljujući \emph{handshaking}-u. \\
 
 Dodatna prednost ovog interfejsa je kompatibilnost sa \textbf{AXI-Stream}\cite{AXI_INTF}, \textbf{Avalon-ST}\cite{AVALON_INTF}
-i sličnim streaming interfejsima. Zahvaljujući tome moguće je povezati ovaj
-interfejs sa AXI-Stream i Avalon-ST bez dodatnog adaptera. \\
+i sličnim streaming interfejsima.
+Zahvaljujući tome integracija IP jezgra koje koristi DTI spoljne interfejse sa
+AXI-Stream IP jezgrima je trivijalna. \\
 
 Interfejs će biti detaljnije objašnjen u PyGears(\ref{pygears_sec}) sekciji.
