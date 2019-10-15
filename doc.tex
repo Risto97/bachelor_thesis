@@ -21,6 +21,14 @@
 % \date{septembar 2019}
 
 % \selectcolormodel{gray}
+
+
+\usepackage{fancyhdr}
+\usepackage{lipsum}% just to generate text for the example
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0.4pt}% Default \headrulewidth is 0.4pt
+\fancyhead[L]{}
+
 \begin{document}
 %% listing and figure numbering per section %%
 \counterwithin{lstlisting}{section}

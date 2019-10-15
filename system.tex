@@ -201,6 +201,8 @@ doći reverznim inženjeringom. \\
 
 U narednoj tabeli biće prikazano zauzeće hardverskih resursa u slučaju PyGears
 implementacije.
+Implementirano je IP jezgro koje radi sa slikama dimenzije 240x320 i koristi
+OpenCV model za detekciju lica, opisan ranije.
 Biće prikazana potrošnja samo glavnog IP jezgra i ukupnog sistema. \\
 
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
@@ -473,6 +475,7 @@ AXI Lite dm\_cmd komponenta se sastoji od sledećih registara.
 \begin{tabular}{| P{3.0cm} | P{4cm} | P{8cm} |}
   \hline
   Address Offset & Register Name & Description \\ \hline
+  \hline
   0x00 & MM2S\_ADDR & Address of source image in DDR. \\ \hline
   0x04 & MM2S\_BTT & Bytes to transfer for source image. \\ \hline
   0x08 & S2MM\_ADRR & Destination address for results. \\ \hline

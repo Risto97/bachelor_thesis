@@ -1,4 +1,6 @@
-\section{Poređenje performansi}
+\section{Performanse i optimizacije}
+
+\subsection{Performanse}
 
 Performanse projektovanog IP jezgra biće upoređene sa softverskim
 implementacijama.
@@ -22,6 +24,7 @@ slika veličine 240x320.
   \begin{tabular}{| P{2cm} | P{2.5cm} | P{2.5cm} | P{2.5cm} | P{2.5cm} |}
     \hline
     Platform & OpenCV Scaling Auto & OpenCV Scaling Fixed & C++ Spec & IP Core \\ \hline
+    \hline
     Zynq & 571 ms & 205 ms & 3593 ms & 926 ms \\ \hline
     Thinkpad & 28 ms & 10.3 ms & 194 ms & N/A \\ \hline
     Ryzen & 22.8 ms & 9.7 ms & 192 ms & N/A \\ \hline
@@ -50,3 +53,112 @@ zadatke u paraleli.
 Pošto IP jezgra zauzimaju malo hardverskih resursa, postoji mogućnost
 instancioniranja više IP jezgra u sistemu i paralelne detekcije više slika
 istovremeno, pritom bez gubitaka performansi usled paralelizma. \\
+
+\subsection{Optimizacije}
+
+Performanse OpenCV softverske implementacije je moguće postići uvođenjem nekih
+izmena u hardverskoj arhitekturi, neke od izmena su:
+
+\subsubsection{Refaktorisanje generisanja integralne slike}
+
+Trenutni način generisanja integralne slike je jednostavan, ali veoma neefikasan.\\
+Kao što je prikazano na slici(\ref{hop_sweep1}), prilikom iteracije hopper-a
+po X koordinati, prethodno izračunati pikseli integralne slike se odbacuju i
+integralna slika se računa za ceo sledeći prozor.
+Moguće je iskoristiti vrednosti integralne slike za kolone 1-4, zatim je
+potrebno izračunati samo 5. kolonu integralne slike u sledećoj iteraciji.\\
+Na slici(\ref{fb_perf}) na prvom interfejsu može se videti vreme računanja
+integralne slike u odnosu na vreme rada klasifikatora.
+U slučaju ove optimizacije to vreme bi bilo značajno smanjeno. \\
+
+Ovo će dovesti do  značajnog rasta vrednosti integralne slike, pa je zbog
+toga potrebna i veća memorija u okviru frame\_buffer modula, kao i šire
+magistrale aritmetičkih operacija u classifier modulu.
+Pored toga ii\_gen i rd\_addrgen moduli bi bili značajno komplikovaniji. \\
+
+Iako bi se količina memorije i broj aritmetičkih funkcionalnih jedinica povećao,
+ovu optimizaciju bi trebalo prvo razmatrati u slučaju daljeg ubrzanja IP jezgra.
+Ukoliko bi se optimizacija implementirala moglo bi se očekivati značajno ubrzanje IP jezgra.
+
+\subsubsection{Generisanje integralne slike tokom rada klasifikatora}
+
+Nakon što ii\_gen generiše integralnu sliku, ona se skladišti u frame\_buffer
+modul.
+Tokom rada klasifikatora ii\_gen čeka na rezultat klasifikatora. \\
+
+Na sledećoj slici se mogu videti interfejs za upis i čitanje frame\_buffer
+modula.
+Ulazni interfejs za upis je izlaz iz ii\_gen modula, dok izlazni interfejs
+predstavlja ulaz klasifikatora.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=1.\linewidth]{fb_perf}
+  \caption{Performanse frame\_buffer modula}
+  \label{fb_perf}
+\end{figure}
+
+Na gornjem interfejsu koji predstavlja izlaz ii\_gen modula može se videti
+prvi period pauze negde oko 305 us.
+Tada je generisanje integralne slike gotovo i klasifikator počinje sa radom.
+U ovom slučaju trajanje rada klasifikatora je kratko zbog toga što je prozor
+odbačen posle prve etape. \\
+
+U narednoj periodu pauze gornjeg interfejsa negde oko 315 - 318 us može se
+videti značajno duže vreme pauze.
+Tada je klasifikator dostigao neku od viših etapa, pa je tek kasnije odbacio
+prozor.
+Može se videti da se u ovom periodu može izračunati ceo prozor integralne slike
+tokom rada klasifikatora.
+Kako bi se ovo odradilo potrebno je duplirati frame\_buffer memoriju.
+
+\subsubsection{Paralelno računanje prve etape}
+
+Kao što se vidi na grafiku(\ref{cascade_classifier_img2}) prva etapa će se
+izvršiti u svakom analiziranom prozoru, izvršavanje svake naredne etape
+eksponencijalno opada.
+Posle 5. etape procenat izvršavanja je manje od 1\%.
+Prva etapa ima 9 obeležja, a zatim svaka naredna
+eksponencijalno više.
+Pošto će se veliki procenat vremena prilikom rada IP jezgra provesti na
+računanje prve etape, računanje ove etape bi se moglo računati posebnim
+prilagođenim klasifikatorom.
+
+\subsubsection{Paralelni klasifikatori}
+
+Kako bi se omogućio rad paralelnih klasifikatora, potrebno je izdeliti ulaznu
+IMG RAM memoriju na regione.
+Tako da će svaki paralelni klasifikator obrađivati svoj region. \\
+
+U ovom slučaju treba umnožiti ii\_gen, sii\_gen, frame\_buffer, stddev module.
+Adresu za čitanje koju generiše rd\_addrgen je moguće izvesti za svaki region
+uvođenjem offset-a adrese, tako da rd\_addrgen nije potrebno umnožiti u ovom
+slučaju.
+Moguće je koristiti jednu features\_mem memoriju za sve paralelne klasifikatore,
+ali u tom slučaju svi paralelni klasifikatori će raditi brzinom najsporijeg
+klasifikatora.
+Moguće je ponovno koristiti i memorije iz classifier modula, što uvesti isti
+efekat kao i features\_mem memorije.
+Aritmetičke operatore iz classifier modula je potrebno umnožiti.
+
+\subsubsection{Računanje više obeležja u paraleli}
+Kao što se može videti na blok dijagramu klasifikatora(\ref{classifier_bd})
+trenutno se jedno obeležje računa u trenutku.
+Potrebno je četiri takta da se površina jednog pravougaonika izračuna.
+Moguće je računati 2 obeležja u paraleli.
+U tom slučaju bi frame\_buffer memorija bila duplirana zbog većeg broja portova
+za čitanje.
+Dok bi features\_mem memorija bila značajno komplikovanija, kao i classifier modul.
+
+\subsubsection{Računanje skaliranih slika u paraleli}
+
+Kao što se može videti na slici(\ref{image_pyramid}) originalna slika se mora
+obrađivati više puta nakon skaliranja.
+Rezultati obrade slika na različitim skalama nemaju međusobnu zavisnost, zbog
+toga je moguće obrađivati ih u paraleli. \\
+
+Primenom ove optimizacije ne može se dobiti linearno uvećanje brzine.
+Pošto je najviše vremena potrebno da se obradi originalna slika, dok je za svaku
+narednu skaliranu sliku potrebno sve manje vremena za obradu.
+Dobitak performansi ove optimizacije verovatno nije opravdan za dodatne
+hardverske resurse.
