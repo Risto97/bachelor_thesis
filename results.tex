@@ -88,8 +88,9 @@ Tokom rada klasifikatora ii\_gen čeka na rezultat klasifikatora. \\
 
 Na sledećoj slici se mogu videti interfejs za upis i čitanje frame\_buffer
 modula.
-Ulazni interfejs za upis je izlaz iz ii\_gen modula, dok izlazni interfejs
-predstavlja ulaz klasifikatora.
+Gornji interfejs predstavlja izlaz iz ii\_gen modula i povezan je interfejsom za
+upis frame\_buffer memorije.
+Donji interfejs je izlaz frame\_buffer modula. \\
 
 \begin{figure}[H]
   \centering
@@ -98,24 +99,33 @@ predstavlja ulaz klasifikatora.
   \label{fb_perf}
 \end{figure}
 
-Na gornjem interfejsu koji predstavlja izlaz ii\_gen modula može se videti
-prvi period pauze negde oko 305 us.
-Tada je generisanje integralne slike gotovo i klasifikator počinje sa radom.
-U ovom slučaju trajanje rada klasifikatora je kratko zbog toga što je prozor
-odbačen posle prve etape. \\
+Na osnovu aktivnosti donjeg interfejsa može se videti vreme rada klasifikatora, kao što se
+može videti to vreme je promenljivo.
+Vreme aktivnosti gornjeg interfejsa je konstantno, jer je vreme računanja
+integralne slike konstantno. \\
 
-U narednoj periodu pauze gornjeg interfejsa negde oko 315 - 318 us može se
-videti značajno duže vreme pauze.
-Tada je klasifikator dostigao neku od viših etapa, pa je tek kasnije odbacio
-prozor.
-Može se videti da se u ovom periodu može izračunati ceo prozor integralne slike
+Nakon završetka računanja integralne slike u trenutku kursora 1, klasifikator
+počinje sa radom.
+Rad klasifikatora traje do kursora 2.
+U ovom slučaju vreme rada klasifikatora je kratko jer je prozor odbačen posle
+prve etape. \\
+
+Nakon kursora broj 2 počinje generisanje integralne slike i traje do kursora 3.
+Integralna slika se generiše takođe i između kursora 4-5 i 6-7, kao što se može
+videti ovo vreme je konstantno. \\
+
+Između kursora 3-4 može se videti značajno duža aktivnost na donjem interfejsu,
+posledica toga je što je klasifikator stigao do 4. etape nakon čega je odbačen prozor.
+Između kursora 5-6 klasifikator odbacuje se prozor nakon 3. etape. \\
+
+Može se videti da se u periodu između kursora 3-4 može izračunati ceo prozor integralne slike
 tokom rada klasifikatora.
 Kako bi se ovo odradilo potrebno je duplirati frame\_buffer memoriju.
 
 \subsubsection{Paralelno računanje prve etape}
 
 Kao što se vidi na grafiku(\ref{cascade_classifier_img2}) prva etapa će se
-izvršiti u svakom analiziranom prozoru, izvršavanje svake naredne etape
+izvršiti u svakom analiziranom prozoru, procenat izvršavanja svake naredne etape
 eksponencijalno opada.
 Posle 5. etape procenat izvršavanja je manje od 1\%.
 Prva etapa ima 9 obeležja, a zatim svaka naredna
