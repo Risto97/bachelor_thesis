@@ -212,8 +212,8 @@ Biće prikazana potrošnja samo glavnog IP jezgra i ukupnog sistema. \\
   \begin{tabular}{| P{4cm} | P{2cm} | P{2cm} | P{2cm} | P{2cm} | P{2cm} |}
     \hline
     Name  & LUT & FF & BRAM & DSP  \\ \hline
-    Total & 14,259 & 14,033 & 47.5  & 7  \\ \hline
-    Cascade Classifier & 6,216 & 2,252 & 35  & 7 \\ \hline
+    Total & 10,664 & 14,277 & 56  & 7  \\ \hline
+    Cascade Classifier & 2,621 & 2,496 & 43.5  & 7 \\ \hline
   \end{tabular}
 \end{center}
 
@@ -234,8 +234,8 @@ implemtacije iste arhitekture. \\
   \begin{tabular}{| P{4cm} | P{2cm} | P{2cm} | P{2cm} | P{2cm} | P{2cm} |}
     \hline
     Name  & LUT & FF & BRAM & DSP  \\ \hline
-    Total & 9,648  & 13,875  & 53.5  & 15   \\ \hline
-    Cascade Classifier & 1,605  & 2,094  & 41  & 15 \\ \hline
+    Total & 9,735  & 13,853  & 53.5  & 7   \\ \hline
+    Cascade Classifier & 1,692  & 2,072  & 41  & 7 \\ \hline
   \end{tabular}
 \end{center}
 
@@ -244,21 +244,26 @@ Dodatni hardverski resursi u slučaju PyGears implementacije se uglavno ogledaju
 u dodatnim LUT-ovima i FF-ovima.
 Ovi LUT-ovi i FF-ovi implementiraju sinhronizaciju i handshaking u
 okviru PyGears dizajna.
-Kao što se može videti postoji razlika između potrošnje DSP blokova i BRAM
-memorija, ove komponente uglavnom se koriste prilikom implementacije aritmetike
-i memorije potrebne za samu funkcionalnost dizajna, a ne za implementaciju
-sinhronizacionih komponenti.\\
+U ovom slučaju Pygears verzija zauzima 929 LUT-ova i 424 FF-a više.\\
 
-Prilikom sinteze alat može odlučiti na osnovu širina magistrala da li će
-aritmetičku operaciju implementirati kao DSP blok, pomoću LUT-ova ili drugih komponenti, u ova dva
-slučaja zbog razlike u širinama internih signala alat za sintezu je istu
-komponentu početne arhitekture implementirao na različite načine.
-Tada se može desiti da su neka množenja i sabiranja u PyGears verziji
-implementirana pomoću LUT-ova, dok su neke RAM ili ROM memorije implementirane
-kao FF ili distribuirani RAM-ovi. \\
+Može se videti i mala razlika u broju korišćenih BRAM komponenti.
+Ova razlika potiče od frame\_buffer modula.
+Kako je već ranije opisano frame\_buffer modul se sastoji od 3 umnožene dvo-portne memorije.
+U slučaju SV implementacije ova memorija je modulevana kao memorija sa jednim
+portom za upis i tri porta za čitanje. \\
+U PyGears varijanti su generisane tri dvo-portne memorije kao posebni
+Verilog moduli. \\
+U ovom slučaju za memoriju veličine 25x25 dovoljno je 3 RAMB18E1 komponenti
+odnosno 1.5 BRAM-a.
+Alat za sintezu se u slučaju PyGears varijante odlučio za 3 RAMB36E1 memorije,
+dok je u SV varijanti instancionirao 3 RAMB18E1 memorije.
+PyGears memorija bi se mogla optimizovati kako bi alat lakše instancionirao
+RAMB18E1 memorije u ovakvim situacijama.
+Ova razlika je mala i ne utiče na poređenje ove dve implementacije. \\
 
-Pored toga u PyGears verziji se često dodaju redundantne sinhronizacione
-komponente.
+Dodatni hardverski resursi u PyGears implementaciji se ogledaju u
+sinhronizacionim komponentama.
+Ove komponente često mogu biti i redudantne.
 Primer toga je kada se iz istog izvora razdvaja signal u dve grane, pa se ti
 signali dalje ``broadkastuju'' na više mesta, u ovoj situaciji određen broj dodatnih LUT-ova i
 FF-ova se može ukloniti prilikom sinteze.
