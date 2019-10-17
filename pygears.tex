@@ -35,8 +35,13 @@ Controlpath diriguje podacima u Datapath delu i sačinjen je od mašine stanja.\
 Kako dizajn implementiran pomoću RTL metodologije postaje kompleksniji i mašina
 stanja postaje kompleksnija i sadrži više stanja.
 Pipeline-ovanje, debagovanje  ovakvog dizajna može biti veoma teško. \\
-Prednost Gears metodologije u odnosu na RTL metodologiju najvidljivija je u
-sistemima koji su Dataflow orijentisani.
+Gears metodologija je posebno pogodna u sistemima koji su Dataflow orijentisani.
+U Dataflow sistemima može se razmišljati o tokovima podataka i njihovim
+transformacijama.
+PyGears omogućava pisanje interfejsa proizvoljog tipa.
+Tako da se mogu napisati Gear-ovi koji svoju funkcionalnost prilagođavaju
+tipom povezanog ulaznog interfejsa.
+Na ovaj način napisani Gear-ovi su apstraktni i laki za razumevanje.
 
 \subsection{Jezici za opis hardvera}
 
