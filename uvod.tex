@@ -1,0 +1,32 @@
+\section{Motivacija}
+
+Automatizacijom industrijskih poslova i razvojem digitalnih sistema, detekcija objekata na
+slici postaje sve zastupljenija u mnogobrojnim uređajima.
+Uređaji koji imaju potrebe za detekcijom objekata na slici se mogu naći u
+industrijskoj elektronici, medicinskoj, potrošačkoj, automobilskoj industriji
+itd... \\
+
+Detekcija objekata je danas sve češće prisutna u embeded sistemima.
+Kako u ovim sistemima postoji ograničenje resursa, potrošnje i performansi
+potrebno je pronaći algoritam koji zadovoljava zadata ograničenja.
+Dobitak performansi u ovim sistemima često dolazi sa cenom potrebnih resursa za
+implementaciju a samim tim i višom cenom. \\
+
+Viola-Jones algoritam predstavlja jedan od algoritama za detekciju objekata koji
+se može efikasno implementirati na embeded sistemima.
+Algoritam implementira tehnike koje smanjuju memorijski ``futprint'' i ubrzavaju
+računanje uz minimalan gubitak pouzdanosti.
+Zbog toga je ovaj algoritam izuzetno pogodan za hardversku implementaciju. \\
+
+\noindent
+U ovom radu biće prikazano:
+\begin{itemize}
+\item Teorijski uvod u Viola-Jones algoritam.
+\item Arhitektura digitalnog hardverskog akceleratora algoritma.
+\item Integracija akceleratora u Zynq 7020 SoC sistem.
+\item Vremenska analiza implementacije i ubrzavanje akceleratora skraćivanjem kombinacionih
+  putanja.
+\item Poređenje akceleratora sa softverskim implementacijama algoritma.
+\item Analiza potrošnje resursa PyGears i SystemVerilog implementacija.
+\item Objašnjenje projektovanog Linux Kernel Driver-a i korisničkih aplikacija.
+\end{itemize}

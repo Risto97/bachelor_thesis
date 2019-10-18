@@ -45,6 +45,10 @@
 \includepdf[pages={3,4},pagecommand={}]{template.pdf}
 \noindent
 
+\renewcommand{\headrulewidth}{0pt}
+\input{statement.tex}
+\newpage
+\renewcommand{\headrulewidth}{0.4pt}% Default \headrulewidth is 0.4pt
 % \thispagestyle{empty}
 % \newpage
 
@@ -60,6 +64,9 @@
 
 \newpage
 \input{glossary.tex}
+\newpage
+
+\input {uvod.tex}
 \newpage
 
 \input{viola_jones.tex}
