@@ -20,6 +20,7 @@
 % \usetheme{Warsaw}
 \usepackage[]{graphicx}
 
+\usepackage[table]{colortbl}
 
 \title[] %optional
 {Hardverska implementacija Viola-Jones algoritma}
@@ -38,25 +39,34 @@
 \date[Oktobar 2019] % (optional)
 {Oktobar 2019}
 
+
 \begin{document}
 \frame{\titlepage}
 
-\begin{frame}
-  \frametitle{Sadržaj}
-  \tableofcontents
-\end{frame}
+% \begin{frame}
+%   \frametitle{Sadržaj}
+%   \tableofcontents
+% \end{frame}
 
 \section{Viola-Jones}
 
 \subsection{Uvod}
 \begin{frame}
   \frametitle{Viola-Jones Algoritam}
-  Algoritam za detekciju objekata na slici.
-  \begin{itemize}
-  \item Paul Viola, Michael Jones 2001.
-  \item<1-> Najčešće korišćen za detekciju lica.
-  \item<1-> Mobilni telefoni, digitalni fotoaparati.
-  \end{itemize}
+  \begin{columns}[onlytextwidth,T]
+    \column{\dimexpr\linewidth-35mm-2mm}
+    Algoritam za detekciju objekata na slici.
+    \begin{itemize}
+    \item Paul Viola, Michael Jones 2001.
+    \item<1-> Najčešće korišćen za detekciju lica.
+    \item<1-> Mobilni telefoni, digitalni fotoaparati.
+    \end{itemize}
+
+    \column{50mm}
+    \begin{overprint}
+      \onslide<1>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
+    \end{overprint}
+  \end{columns}
 \end{frame}
 
 \begin{frame}
@@ -78,16 +88,6 @@
 %   \item<1-> Računanje bilo koje površine u konstantnom vremenu.
 %   \end{itemize}
 % \end{frame}
-
-\begin{frame}
-  \frametitle{Integralna slika}
-  Piksel integralne slike predstavlja zbir svih piksela koji se nalaze gore i levo
-  na originalnoj slici.
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.55\linewidth]{../images/integral_image1}
-  \end{figure}
-\end{frame}
 
 \begin{frame}
   \frametitle{Integralna slika}
@@ -117,21 +117,12 @@
 
       \begin{figure}[H]
         \centering
-        \includegraphics[width=0.8\linewidth]{../images/haar_features1}
+        \includegraphics[width=0.85\linewidth]{../images/haar_features1}\\
+        \vspace{1\baselineskip}
+        \includegraphics[width=0.85\linewidth]{../images/haar_features2}\\
       \end{figure}
     \end{columns}
 \end{frame}
-
-\begin{frame}
-  \frametitle{HAAR obeležja, Ciljaju karakteristike objekta}
-  Čelo svetlije od očiju. \\
-  Nos svetliji od očiju. \\
-  \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\linewidth]{../images/haar_features2}
-  \end{figure}
-\end{frame}
-
 
 \subsection{Ada Boost}
 \begin{frame}
@@ -156,17 +147,16 @@
   \begin{itemize}
   \item<1-> 2913 obeležja u modelu.
   \item<1-> Veliki deo slike pozadina.
-  \item<2-> Ranije odbacivanje pozadine.
-  \item<2-> 2913 klasifikatora u 25 etapa.
-  \item<3-> Posle pete etape odbačeno 99\%.
+  \item<1-> Ranije odbacivanje pozadine.
+  \item<1-> 2913 klasifikatora u 25 etapa.
+  \item<2-> Posle pete etape odbačeno 99\%.
   \end{itemize}
 
 
   \column{80mm}
   \begin{overprint}
-    \onslide<1>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
-    \onslide<2>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier1}
-    \onslide<3>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier2}
+    \onslide<1>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier1}
+    \onslide<2>\includegraphics[width=0.9\linewidth]{../images/cascade_classifier2}
   \end{overprint}
 
   \end{columns}
@@ -177,59 +167,63 @@
   \frametitle{Skaliranje slike}
 
   \begin{columns}[onlytextwidth,T]
-    \column{\dimexpr\linewidth-60mm-2mm}
+    \column{0.4\linewidth}
     \begin{itemize}
     \item<1-> Objekti različite veličine.
-    \item<2-> Piramida skaliranih slika.
+    \item<1-> Piramida skaliranih slika.
     \end{itemize}
 
+    \begin{figure}[H]
+      \centering
+      \includegraphics[width=1.0\linewidth]{../images/image_pyramid}
+    \end{figure}
 
-    \column{80mm}
-    \begin{overprint}
-      \onslide<1>\includegraphics[width=0.83\linewidth]{../images/sixfaces_scaled_res}
-      \onslide<2>\includegraphics[width=0.7\linewidth]{../images/image_pyramid}
-    \end{overprint}
+    \column{0.6\linewidth}
+      \begin{figure}[H]
+        \centering
+        \includegraphics[width=1.0\linewidth]{../images/sixfaces_scaled_res}
+      \end{figure}
 
   \end{columns}
 \end{frame}
 
-\subsection{Osetljivost na osvetljaj i rotaciju}
-\begin{frame}
-  \frametitle{Osetljivost na osvetljaj i rotaciju}
+% \subsection{Osetljivost na osvetljaj i rotaciju}
+% \begin{frame}
+%   \frametitle{Osetljivost na osvetljaj i rotaciju}
 
-  \begin{columns}[onlytextwidth,T]
-    \column{\dimexpr\linewidth-50mm-2mm}
-    \begin{itemize}
-    \item<1-> Osetljiv na osvetljaj.
-    \item<2-> I na rotaciju.
-    \end{itemize}
-
-
-    \column{80mm}
-    \begin{overprint}
-      \onslide<1>\includegraphics[width=0.7\linewidth]{../images/overexposed_light}
-      \onslide<2>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
-      \onslide<3>\includegraphics[width=0.7\linewidth]{../images/rotated_res}
-    \end{overprint}
-
-  \end{columns}
-\end{frame}
+%   \begin{columns}[onlytextwidth,T]
+%     \column{\dimexpr\linewidth-50mm-2mm}
+%     \begin{itemize}
+%     \item<1-> Osetljiv na osvetljaj.
+%     \item<2-> I na rotaciju.
+%     \end{itemize}
 
 
-\section{OpenCV}
-\begin{frame}
-  \frametitle{OpenCV}
+%     \column{80mm}
+%     \begin{overprint}
+%       \onslide<1>\includegraphics[width=0.7\linewidth]{../images/overexposed_light}
+%       \onslide<2>\includegraphics[width=0.7\linewidth]{../images/rotation_variance}
+%       \onslide<3>\includegraphics[width=0.7\linewidth]{../images/rotated_res}
+%     \end{overprint}
 
-  \begin{itemize}
-  \item<1-> Istrenirani modeli (.xml fajl).
-  \item<1-> Alat za treniranje.
-  \item<1-> Implementacija klasifikatora.
-  % \item<1-> Treba parsirati .xml fajl.
-  % \item<1-> haarcascaade\_frontalface\_default.xml
-  % \item<1-> Python za parsiranje.
-  \end{itemize}
+%   \end{columns}
+% \end{frame}
 
-\end{frame}
+
+% \section{OpenCV}
+% \begin{frame}
+%   \frametitle{OpenCV}
+
+%   \begin{itemize}
+%   \item<1-> Istrenirani modeli (.xml fajl).
+%   \item<1-> Alat za treniranje.
+%   \item<1-> Implementacija klasifikatora.
+%   % \item<1-> Treba parsirati .xml fajl.
+%   % \item<1-> haarcascaade\_frontalface\_default.xml
+%   % \item<1-> Python za parsiranje.
+%   \end{itemize}
+
+% \end{frame}
 
 \section{Specifikacije za izvršavanje}
 \begin{frame}
@@ -237,6 +231,7 @@
   \begin{columns}[onlytextwidth,T]
     \column{\dimexpr\linewidth-55mm-2mm}
     \begin{itemize}
+    \item<1-> OpenCV modeli.
     \item<1-> Python XML parser.
     \item<1-> Python klasa klasifikatora.
     \item<1-> Python klasifikator.
@@ -257,31 +252,29 @@
 \section{Arhitektura hardvera}
 
 \begin{frame}
-  \frametitle{Arhitektura hardvera}
-  \begin{figure}[H]
-    \centering{
-      \resizebox{1.00\textwidth}{!}{%
-        \input{../images/tikz/hw_arch.tex}
-      }}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-   \frametitle<1->{Interfejsi}
+   \frametitle<1->{Arhitektura hardvera, Interfejsi}
    \frametitle<2->{IMG RAM}
 
   \begin{itemize}
-  \item<1-1> \textbf{img\_in} ulazna slika.
-  \item<1-1> \textbf{detect\_addr} detektovane koordinate.
-  \item<1-1> \textbf{irq} interapt signal, zavšetak slike.
+    \begin{overprint}
+      \onslide<1>\item \textbf{img\_in} ulazna slika.
+      \onslide<2>\item RAM memorija za skladištenje slike.
+    \end{overprint}
+    \begin{overprint}
+      \onslide<1>\item \textbf{detect\_addr} detektovane koordinate.
+      \onslide<2>\item Ušteda pristupa eksternoj memoriji.
+    \end{overprint}
+    \begin{overprint}
+      \onslide<1>\item \textbf{irq} interapt signal, zavšetak slike.
+    \end{overprint}
 
-  \item<2-2> RAM memorija, za skladištenje slike.
-  \item<2-2> Ušteda pristupa eksternoj memoriji.
+  % \item<2-2> RAM memorija, za skladištenje slike.
+  % \item<2-2> Ušteda pristupa eksternoj memoriji.
   \end{itemize}
 
   \begin{figure}[H]
     \centering{
-      \resizebox{.87\textwidth}{!}{%
+      \resizebox{1\textwidth}{!}{%
         \input{../images/tikz/hw_arch.tex}
       }}
   \end{figure}
@@ -293,22 +286,16 @@
   \frametitle<1->{rd\_addrgen}
 
   \begin{itemize}
-  \item<1-2> Generiše adrese za čitanje iz IMG RAM.
+  \item<1-1> Generiše adrese za čitanje iz IMG RAM.
 
   \end{itemize}
 
   \begin{figure}[H]
     \centering
-    \resizebox{1.1\textwidth}{!}{%
+    \resizebox{1.0\textwidth}{!}{%
       \centering{
-      \begin{overprint}
-        \onslide<1>\input{../images/tikz/hop_sweep/hop_sweep1.tex}
-        \onslide<2>\input{../images/tikz/hop_sweep/hop_sweep3.tex}
-      \end{overprint}
-      \begin{overprint}
-        \onslide<1>\input{../images/tikz/hop_sweep/hop_sweep2.tex}
-        \onslide<2>\input{../images/tikz/hop_sweep/hop_sweep4.tex}
-      \end{overprint}
+        \input{../images/tikz/hop_sweep/hop_sweep1.tex}
+        \input{../images/tikz/hop_sweep/hop_sweep2.tex}
     }
   }
   \end{figure}
@@ -333,6 +320,19 @@
   \end{figure}
 
 \end{frame}
+
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>
+    \frametitle{Arhitektura hardvera}
+    \begin{figure}[H]
+      \centering{
+        \resizebox{1\textwidth}{!}{%
+          \input{../images/tikz/hw_arch.tex}
+        }}
+    \end{figure}
+  \end{frame}
+}
 
 \subsection{Generator integralne slike}
 
@@ -442,18 +442,113 @@
         \end{figure}
 
   \end{columns}
-  % \begin{itemize}
-  % \item<1-2> Pravougaonik se može predstaviti jednom tačkom, širinom i visinom.
-  % \item<2-2> Po 1 RAM za svaki pravougaonik i za težine.
-
-  % \end{itemize}
-
-  % \begin{figure}[H]
-  %   \resizebox{0.65\textwidth}{!}{%
-  %       \input{../images/tikz/classifier.tex}
-  %   }
-  % \end{figure}
 \end{frame}
+
+\AtBeginSubsection[]
+
+\section{Integracija sa Zynq SoC sistemom}
+
+\begin{frame}
+  \frametitle<1-1>{Integracija sa Zynq SoC sistemom}
+
+  \begin{itemize}
+  \item<1-1> dm\_cmd AXI LITE za komande
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.7\textwidth}{!}{%
+      \input{../images/tikz/system.tex}
+    }
+  \end{figure}
+\end{frame}
+
+\section{Softver procesora}
+
+\begin{frame}
+  \frametitle<1-1>{Softver procesora}
+
+  \begin{itemize}
+  \item<1-1> Driver ima mmap, read, write operacije.
+  \item<1-1> Korisnička aplikacija u dva nivoa.
+
+  \end{itemize}
+
+  \begin{figure}[H]
+    \resizebox{0.7\textwidth}{!}{%
+      \input{../images/tikz/software_stack.tex}
+    }
+  \end{figure}
+\end{frame}
+
+\section{Rezultati implementacije sistema}
+
+\begin{frame}
+  \frametitle<1-1>{Rezultati implementacije sistema}
+
+  \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+  \begin{figure}[H]
+    \begin{center}
+      \centering
+      \captionof{}{Hardverski resursi PyGears}
+      \begin{tabular}{| P{0.25\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} |}
+        \hline
+        Name  & LUT & FF & BRAM & DSP  \\ \hline
+        \cellcolor{green!35}Cascade Classifier & \cellcolor{green!35}2,621 & \cellcolor{green!35}2,496 & \cellcolor{green!35}43.5  & \cellcolor{green!35}7 \\ \hline
+        Total & 10,664 & 14,277 & 56  & 7  \\ \hline
+      \end{tabular}
+    \end{center}
+    \vspace{1cm}
+    \begin{center}
+      \centering
+      \captionof{}{Hardverski resursi SystemVerilog}
+      \begin{tabular}{| P{0.25\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} | P{0.1\textwidth} |}
+        \hline
+        Name  & LUT & FF & BRAM & DSP  \\ \hline
+        \cellcolor{green!35} Cascade Classifier & \cellcolor{green!35}1,692  &\cellcolor{green!35} 2,072  &\cellcolor{green!35} 41  &\cellcolor{green!35} 7 \\ \hline
+        Total & 9,735  & 13,853  & 53.5  & 7   \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{figure}
+\end{frame}
+
+\section{Performanse}
+
+\begin{frame}
+  \frametitle<1-1>{Performanse sistema}
+
+  \begin{itemize}
+  \item Slika 240x320.
+  \item Zynq 7020 frekvencija 100 MHz
+  \item 4.5 puta sporije od OpenCV implementacije
+  \end{itemize}
+
+  \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+  \begin{figure}[H]
+    \renewcommand{\arraystretch}{1.5}
+    \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+    \begin{center}
+      \centering
+      \begin{tabular}{| P{0.12\linewidth} | P{0.18\linewidth} | P{0.18\linewidth} | P{0.18\linewidth} | P{0.18\linewidth} |}
+        \hline
+        Platform & OpenCV Scaling Auto & OpenCV Scaling Fixed & C++ Spec & IP Core \\ \hline
+        \hline
+        Zynq & 571 ms &  \cellcolor{green!35} 205 ms & 3593 ms & \cellcolor{green!35} 926 ms \\ \hline
+        Thinkpad & 28 ms & 10.3 ms & 194 ms & N/A \\ \hline
+        Ryzen & 22.8 ms & 9.7 ms & 192 ms & N/A \\ \hline
+      \end{tabular}
+    \end{center}
+  \end{figure}
+\end{frame}
+
+\section{Hvala na pažnji}
+\begin{frame}
+
+  \centering
+  \Huge{Hvala na pažnji!}
+\end{frame}
+
+
 
 
 
